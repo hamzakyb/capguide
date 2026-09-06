@@ -1,36 +1,89 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Capguide Travel — Next.js
 
-## Getting Started
+Kapadokya turları için tek sayfalık, WhatsApp odaklı tanıtım sitesi ve
+gerçek zamanlı çalışan bir yönetim paneli.
 
-First, run the development server:
+## Kurulum
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- Site: http://localhost:3000
+- Yönetim paneli: http://localhost:3000/admin  (varsayılan şifre: `capguide2026`)
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+Şifreyi değiştirmek için `.env.local.example` dosyasını `.env.local` olarak
+kopyalayıp `ADMIN_PASSWORD` değerini güncelleyin, sonra sunucuyu yeniden başlatın.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+cp .env.local.example .env.local
+```
 
-## Learn More
+## Proje yapısı
 
-To learn more about Next.js, take a look at the following resources:
+| Yol | Açıklama |
+|---|---|
+| `app/(site)/` | Genel siteye özel düzen ve stiller (`site.css`) |
+| `app/admin/` | Yönetim paneli sayfası ve stilleri (`admin.css`) |
+| `app/api/content` | İçeriği okuma (GET) ve kaydetme (PUT, şifreli) |
+| `app/api/upload` | Admin panelinden fotoğraf yükleme |
+| `app/api/login` | Panel girişi / çıkışı (httpOnly cookie) |
+| `components/SiteApp.jsx` | Ana sayfanın tüm arayüzü (istemci bileşeni) |
+| `components/AdminApp.jsx` | Yönetim panelinin tüm arayüzü |
+| `lib/content.js` | `data/content.json` dosyasını okuyup yazan yardımcılar |
+| `data/content.json` | **Sitenin tek veri kaynağı** — turlar, öne çıkanlar, ayarlar |
+| `public/assets/img/` | Tüm fotoğraflar, logo, favicon |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Eski statik siteden fark
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Önceki sürüm düz HTML/CSS/JS dosyalarından oluşuyordu ve admin paneli
+değişiklikleri yalnızca tarayıcıda (localStorage) tutup, kalıcı hale
+getirmek için elle bir `data.js` dosyası indirip yüklemenizi gerektiriyordu.
 
-## Deploy on Vercel
+Bu Next.js sürümünde:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- Admin panelinde **Kaydet**'e bastığınızda içerik doğrudan sunucudaki
+  `data/content.json` dosyasına yazılır — herkes anında yeni içeriği görür,
+  dosya indirip yüklemenize gerek kalmaz.
+  Panelden yüklenen fotoğraflar sunucuya kaydedilip `public/assets/img/`
+  klasörüne yazılır.
+- Panel girişi sunucu taraflı, `httpOnly` bir çerezle korunur (şifre artık
+  tarayıcıda saklanmıyor).
+- İçerik `data/content.json` dosyasında düz JSON olarak durur; isterseniz
+  git ile versiyonlayabilir, isterseniz `.gitignore`'a ekleyip sunucuda
+  ayrı tutabilirsiniz.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## İçeriği elle düzenlemek
+
+Paneli hiç açmadan da `data/content.json` dosyasını doğrudan bir metin
+editörüyle düzenleyebilirsiniz — dosya biçimi şu şekildedir:
+
+```json
+{
+  "settings": { "whatsapp": "905391399131", "email": "info@capguidetravel.com", "...": "..." },
+  "tours": [ { "cat": "tours", "badge": "BEST SELLER", "name": "...", "desc": "...", "img": "/assets/img/...", "wa": "..." } ],
+  "featured": [ { "name": "...", "title": "...", "sub": "...", "img": "/assets/img/..." } ]
+}
+```
+
+## Fotoğraflar
+
+`public/assets/img/` klasöründe. Kaynak ve lisans bilgisi için
+`public/assets/img/CREDITS.txt` dosyasına bakın — mevcut fotoğrafların
+çoğu geçici olarak serbest lisanslı kaynaklardan (Wikimedia Commons,
+Openverse/Flickr) alınmıştır; kendi fotoğraflarınızı aynı dosya adlarıyla
+üzerine kaydedebilir ya da admin panelinden yeni dosya yükleyebilirsiniz.
+
+## Dağıtım (production)
+
+```bash
+npm run build
+npm start
+```
+
+`data/` ve `public/assets/img/` klasörlerinin sunucuda **yazılabilir**
+olması gerekir (admin panelinin kaydetme ve fotoğraf yükleme özellikleri
+için). Salt-okunur bir dosya sistemi kullanan platformlarda (bazı
+serverless ortamlar) bu iki klasör için kalıcı bir disk/volume
+tanımlamanız gerekir.

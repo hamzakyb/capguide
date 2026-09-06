@@ -1,0 +1,270 @@
+{
+  "settings": {
+    "whatsapp": "905391399131",
+    "email": "info@capguidetravel.com",
+    "heroTitleTop": "DISCOVER",
+    "heroTitleBottom": "CAPPADOCIA",
+    "heroSub": "Tours • Adventures • Experiences",
+    "heroImg": "/assets/img/hero.jpg",
+    "aboutImg": "/assets/img/about.jpg",
+    "defaultMsg": "Hello, I would like to get information about your Cappadocia tours and activities."
+  },
+  "tours": [
+    {
+      "cat": "tours",
+      "badge": "BEST SELLER",
+      "name": "Cappadocia Red Tour",
+      "desc": "Discover Cappadocia's iconic valleys, fairy chimneys and breathtaking viewpoints.",
+      "time": "Full day",
+      "price": "",
+      "img": "/assets/img/red-tour.jpg",
+      "wa": "Hello, I would like to get information about Cappadocia Red Tour."
+    },
+    {
+      "cat": "tours",
+      "badge": "POPULAR",
+      "name": "Cappadocia Green Tour",
+      "desc": "Underground cities, deep valleys and the wild south of Cappadocia in one day.",
+      "time": "Full day",
+      "price": "",
+      "img": "/assets/img/green-tour.jpg",
+      "wa": "Hello, I would like to get information about Cappadocia Green Tour."
+    },
+    {
+      "cat": "tours",
+      "badge": "",
+      "name": "Cappadocia Mix Tour",
+      "desc": "The best highlights of the Red and Green routes combined into one unforgettable day.",
+      "time": "Full day",
+      "price": "",
+      "img": "/assets/img/mix-tour.jpg",
+      "wa": "Hello, I would like to get information about Cappadocia Mix Tour."
+    },
+    {
+      "cat": "tours",
+      "badge": "PRIVATE",
+      "name": "Cappadocia Private Tours",
+      "desc": "Your own guide, your own car, your own pace. A fully flexible Cappadocia day.",
+      "time": "Flexible",
+      "price": "",
+      "img": "/assets/img/private-tour.jpg",
+      "wa": "Hello, I would like to get information about Cappadocia Private Tours."
+    },
+    {
+      "cat": "activities",
+      "badge": "BEST SELLER",
+      "name": "Cappadocia ATV & Quad Safari",
+      "desc": "Ride through Love Valley and the sunset dust of Cappadocia's hidden trails.",
+      "time": "1 – 2 hours",
+      "price": "",
+      "img": "/assets/img/atv.jpg",
+      "wa": "Hello, I would like to get information about Cappadocia ATV & Quad Safari."
+    },
+    {
+      "cat": "activities",
+      "badge": "POPULAR",
+      "name": "Cappadocia Horse Tour",
+      "desc": "Ride through Cappadocia's unique landscapes — the land of beautiful horses.",
+      "time": "1 – 2 hours",
+      "price": "",
+      "img": "/assets/img/horse.jpg",
+      "wa": "Hello, I would like to get information about Cappadocia Horse Tour."
+    },
+    {
+      "cat": "activities",
+      "badge": "",
+      "name": "Cappadocia Jeep Safari",
+      "desc": "An open-air 4x4 adventure through valleys, vineyards and panoramic viewpoints.",
+      "time": "2 hours",
+      "price": "",
+      "img": "/assets/img/jeep.jpg",
+      "wa": "Hello, I would like to get information about Cappadocia Jeep Safari."
+    },
+    {
+      "cat": "activities",
+      "badge": "LIMITED",
+      "name": "Cappadocia Classic Car Tour",
+      "desc": "Cruise the fairy chimneys in a vintage convertible — pure cinematic nostalgia.",
+      "time": "1 – 2 hours",
+      "price": "",
+      "img": "/assets/img/classic-car.jpg",
+      "wa": "Hello, I would like to get information about Cappadocia Classic Car Tour."
+    },
+    {
+      "cat": "activities",
+      "badge": "NEW",
+      "name": "Cappadocia Trike Bike Tours",
+      "desc": "Feel the wind on three wheels while exploring Cappadocia's most scenic roads.",
+      "time": "1 – 2 hours",
+      "price": "",
+      "img": "/assets/img/trike.jpg",
+      "wa": "Hello, I would like to get information about Cappadocia Trike Bike Tours."
+    },
+    {
+      "cat": "activities",
+      "badge": "",
+      "name": "Cappadocia Camel Tour",
+      "desc": "A calm, timeless ride between the fairy chimneys — perfect for sunset photos.",
+      "time": "30 – 60 min",
+      "price": "",
+      "img": "/assets/img/camel.jpg",
+      "wa": "Hello, I would like to get information about Cappadocia Camel Tour."
+    },
+    {
+      "cat": "activities",
+      "badge": "LIMITED",
+      "name": "Cappadocia Microlight Flight",
+      "desc": "Fly low and free above the valleys for a view only a few travelers ever see.",
+      "time": "20 – 30 min",
+      "price": "",
+      "img": "/assets/img/microlight.jpg",
+      "wa": "Hello, I would like to get information about Cappadocia Microlight Flight."
+    },
+    {
+      "cat": "activities",
+      "badge": "",
+      "name": "Cappadocia Ski Tour",
+      "desc": "Snow over the fairy chimneys and a day on the slopes of Mount Erciyes.",
+      "time": "Full day",
+      "price": "",
+      "img": "/assets/img/ski.jpg",
+      "wa": "Hello, I would like to get information about Cappadocia Ski Tour."
+    },
+    {
+      "cat": "transfer",
+      "badge": "",
+      "name": "Cappadocia Airport Transfer",
+      "desc": "Comfortable private transfers from Kayseri and Nevşehir airports to your hotel.",
+      "time": "On request",
+      "price": "",
+      "img": "/assets/img/transfer.jpg",
+      "wa": "Hello, I would like to get information about Cappadocia Airport Transfer."
+    },
+    {
+      "cat": "transfer",
+      "badge": "",
+      "name": "Cappadocia Rent a Car",
+      "desc": "Explore Cappadocia on your own schedule with a clean, reliable rental car.",
+      "time": "Daily",
+      "price": "",
+      "img": "/assets/img/rent-a-car.jpg",
+      "wa": "Hello, I would like to get information about Cappadocia Rent a Car."
+    },
+    {
+      "cat": "transfer",
+      "badge": "SUPER PRICE",
+      "name": "Cappadocia Rent a Scooter",
+      "desc": "The easiest and most fun way to move between the valleys and villages.",
+      "time": "Daily",
+      "price": "",
+      "img": "/assets/img/scooter.jpg",
+      "wa": "Hello, I would like to get information about Cappadocia Rent a Scooter."
+    },
+    {
+      "cat": "experiences",
+      "badge": "",
+      "name": "Cappadocia Wine Taste",
+      "desc": "Taste ancient volcanic-soil wines in one of the world's oldest wine regions.",
+      "time": "1 – 2 hours",
+      "price": "",
+      "img": "/assets/img/wine.jpg",
+      "wa": "Hello, I would like to get information about Cappadocia Wine Taste."
+    },
+    {
+      "cat": "experiences",
+      "badge": "POPULAR",
+      "name": "Cappadocia Turkish Night",
+      "desc": "Live music, folk dances and a warm Anatolian evening in a cave restaurant.",
+      "time": "Evening",
+      "price": "",
+      "img": "/assets/img/turkish-night.jpg",
+      "wa": "Hello, I would like to get information about Cappadocia Turkish Night."
+    },
+    {
+      "cat": "experiences",
+      "badge": "",
+      "name": "Cappadocia Dervish Show",
+      "desc": "The mesmerizing whirling ceremony — a spiritual tradition centuries old.",
+      "time": "1 hour",
+      "price": "",
+      "img": "/assets/img/dervish.jpg",
+      "wa": "Hello, I would like to get information about Cappadocia Dervish (Whirling) Show."
+    },
+    {
+      "cat": "experiences",
+      "badge": "BEST SELLER",
+      "name": "Cappadocia Hot Air Balloon Tour",
+      "desc": "Cappadocia's most iconic experience — sunrise above the valleys and chimneys.",
+      "time": "Sunrise",
+      "price": "",
+      "img": "/assets/img/balloon.jpg",
+      "wa": "Hello, I would like to get information about Cappadocia Hot Air Balloon Tour."
+    },
+    {
+      "cat": "experiences",
+      "badge": "NEW",
+      "name": "Cappadocia Photoshooting",
+      "desc": "A professional photo session with dresses, balloons and the perfect light.",
+      "time": "1 – 2 hours",
+      "price": "",
+      "img": "/assets/img/photoshoot.jpg",
+      "wa": "Hello, I would like to get information about Cappadocia Photoshooting."
+    },
+    {
+      "cat": "experiences",
+      "badge": "",
+      "name": "Cappadocia Turkish Bath",
+      "desc": "Relax and reset in a traditional hammam after a long day of adventure.",
+      "time": "1 – 2 hours",
+      "price": "",
+      "img": "/assets/img/hammam.jpg",
+      "wa": "Hello, I would like to get information about Cappadocia Turkish Bath."
+    },
+    {
+      "cat": "workshops",
+      "badge": "",
+      "name": "Cappadocia Pottery Workshop",
+      "desc": "Create your own Cappadocian masterpiece with a master of Avanos clay.",
+      "time": "1 – 2 hours",
+      "price": "",
+      "img": "/assets/img/pottery.jpg",
+      "wa": "Hello, I would like to get information about Cappadocia Pottery Workshop."
+    },
+    {
+      "cat": "workshops",
+      "badge": "POPULAR",
+      "name": "Cappadocia Mozaic Lamp Workshop",
+      "desc": "Design and take home your own handmade Turkish mosaic lamp.",
+      "time": "2 hours",
+      "price": "",
+      "img": "/assets/img/mosaic.jpg",
+      "wa": "Hello, I would like to get information about Cappadocia Mozaic Lamp Workshop."
+    }
+  ],
+  "featured": [
+    {
+      "name": "Cappadocia Hot Air Balloon Tour",
+      "title": "HOT AIR BALLOON",
+      "sub": "Cappadocia's most iconic experience",
+      "img": "/assets/img/balloon.jpg"
+    },
+    {
+      "name": "Cappadocia ATV & Quad Safari",
+      "title": "ATV SAFARI",
+      "sub": "Adventure through the valleys",
+      "img": "/assets/img/atv.jpg"
+    },
+    {
+      "name": "Cappadocia Horse Tour",
+      "title": "HORSE TOUR",
+      "sub": "Ride through Cappadocia's unique landscapes",
+      "img": "/assets/img/horse.jpg"
+    },
+    {
+      "name": "Cappadocia Pottery Workshop",
+      "title": "POTTERY WORKSHOP",
+      "sub": "Create your own Cappadocian masterpiece",
+      "img": "/assets/img/pottery.jpg"
+    }
+  ]
+}

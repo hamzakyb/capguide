@@ -1,0 +1,37 @@
+CAPGUIDE TRAVEL — FOTOĞRAF KAYNAKLARI VE LİSANSLARI
+====================================================
+Tüm fotoğraflar serbest/açık lisanslı kaynaklardan alınmıştır
+(Wikimedia Commons — CC BY / CC BY-SA / Public Domain,
+ Openverse üzerinden Flickr — ticari kullanıma açık CC lisanslar).
+
+CC BY ve CC BY-SA lisanslı görselleri kullanırken sitenizde bir
+"Photo credits" satırı bulundurmanız gerekir. Kendi çektiğiniz
+fotoğrafları koyduğunuzda ilgili satırı bu listeden silin.
+
+Biçim: dosya | eser adı | fotoğrafçı | lisans | kaynak
+----------------------------------------------------
+about.jpg | File:Fairy Chimneys, Cappadocia.jpg | Iain MacFadzean | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File%3AFairy_Chimneys%2C_Cappadocia.jpg
+atv.jpg | Radar Hill Off-Highway Vehicle Area | BLM Oregon & Washington | CC BY | https://www.flickr.com/photos/50169152@N06/37211953891
+balloon.jpg | balloons flying over Cappadocia | girolame | CC BY | https://www.flickr.com/photos/91241612@N00/4592234538
+camel.jpg | File:Camels of Cappadocia - panoramio.jpg | Tevfik Teker | CC BY 3.0 | https://commons.wikimedia.org/wiki/File%3ACamels_of_Cappadocia_-_panoramio.jpg
+classic-car.jpg | In Memory of Dave O'Brien, My Brother | dok1 | CC BY | https://www.flickr.com/photos/51096110@N00/353906390
+dervish.jpg | File:TR.DN.Pamukkale The-Sufi-Whirling-Dervishes 71 3x2-R 4K.jpg | Roy Egloff | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File%3ATR.DN.Pamukkale_The-Sufi-Whirling-Dervishes_71_3x2-R_4K.jpg
+green-tour.jpg | Ihlara Valley | blieusong | CC BY-SA | https://www.flickr.com/photos/75729488@N03/7144836561
+hammam.jpg | File:Turkish Baths interior, Paphos.jpg | lhourahane | CC BY 2.0 | https://commons.wikimedia.org/wiki/File%3ATurkish_Baths_interior%2C_Paphos.jpg
+hero.jpg | A sunrise view from a hot air balloon over Göreme - Cappadocia, Turkey | johndbritton | CC BY-SA | https://www.flickr.com/photos/25953512@N03/9509681131
+horse.jpg | File:Horse riding in Cappadocia.jpg | Jérôme Bon | CC BY 2.0 | https://commons.wikimedia.org/wiki/File%3AHorse_riding_in_Cappadocia.jpg
+jeep.jpg | File:Offroad (38562669821).jpg | Norbert Reimer from Mettlach-Orscholz, Saarland | CC BY-SA 2.0 | https://commons.wikimedia.org/wiki/File%3AOffroad_%2838562669821%29.jpg
+microlight.jpg | Mid Anglian Microlights Ikarus C42 | John D Fielding | CC BY | https://www.flickr.com/photos/29372296@N00/9993076824
+mix-tour.jpg | File:Stone snail rock formation in Devrent Valley, Cappadocia - Turkey.jpg | Ekke from Durham, United Kingdom | CC BY 2.0 | https://commons.wikimedia.org/wiki/File%3AStone_snail_rock_formation_in_Devrent_Valley%2C_Cappadocia_-_Turkey.jpg
+mosaic.jpg | IMG_9416 | beggs | CC BY | https://www.flickr.com/photos/94509941@N00/6292397641
+photoshoot.jpg | File:Christina the Red (IMG 4744a) (5647649928).jpg | Frank Kovalchek from USA | CC BY 2.0 | https://commons.wikimedia.org/wiki/File%3AChristina_the_Red_%28IMG_4744a%29_%285647649928%29.jpg
+pottery.jpg | File:In a pottery workshop in Avanos, Cappadocia, Turkey, May, 2015-1.jpg | Alexey Komarov | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File%3AIn_a_pottery_workshop_in_Avanos%2C_Cappadocia%2C_Turkey%2C_May%2C_2015-1.jpg
+private-tour.jpg | File:Cappadocia Gorëme and Uchisar (6998750136).jpg | Benh LIEU SONG from Torcy, France | CC BY-SA 2.0 | https://commons.wikimedia.org/wiki/File%3ACappadocia_Gor%C3%ABme_and_Uchisar_%286998750136%29.jpg
+red-tour.jpg | File:Göreme Open Air Museum-20090910-DSCF0869.jpg | Jose Huwaidi | CC BY 4.0 | https://commons.wikimedia.org/wiki/File%3AG%C3%B6reme_Open_Air_Museum-20090910-DSCF0869.jpg
+rent-a-car.jpg | Lower Earley, Berkshire - UK | Mic V. | CC BY | https://www.flickr.com/photos/33756577@N08/4334670894
+scooter.jpg | Rental electric motor scooters in the parking lot of iias Kasugai - 2 | KKPCW（Kyu3） | CC BY-SA | https://commons.wikimedia.org/w/index.php?curid=133230179
+ski.jpg | File:At height.jpg | Alina Hedz | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File%3AAt_height.jpg
+transfer.jpg | File:Coach Park, Moffat - geograph.org.uk - 2331230.jpg | Rob Newman | CC BY-SA 2.0 | https://commons.wikimedia.org/wiki/File%3ACoach_Park%2C_Moffat_-_geograph.org.uk_-_2331230.jpg
+trike.jpg | 42. 2013 Can Am Spyder RS | 70_musclecar_RT+6 | CC BY-SA | https://www.flickr.com/photos/35707376@N00/11430904673
+turkish-night.jpg | Turkish Olympiad Southeast 2010-31 | johntrainor | CC BY | https://www.flickr.com/photos/59158146@N00/4450074171
+wine.jpg | Our Lunch .. Dinner and Tea! | Jocey K | CC BY-SA | https://www.flickr.com/photos/48627921@N05/13335916033
