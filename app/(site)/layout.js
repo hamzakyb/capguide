@@ -1,4 +1,5 @@
 import { Cormorant_Garamond, Jost } from "next/font/google";
+import { readContent } from "@/lib/content";
 import "./site.css";
 
 const cormorant = Cormorant_Garamond({
@@ -13,11 +14,14 @@ const jost = Jost({
   variable: "--font-sans"
 });
 
-export const metadata = {
-  title: "Capguide Travel — Discover Cappadocia",
-  description: "Capguide Travel — Tours, adventures, experiences and workshops in Cappadocia. Plan your experience on WhatsApp.",
-  icons: { icon: "/icon.png" }
-};
+export async function generateMetadata() {
+  const { settings } = await readContent();
+  return {
+    title: "Capguide Travel — Discover Cappadocia",
+    description: "Capguide Travel — Tours, adventures, experiences and workshops in Cappadocia. Plan your experience on WhatsApp.",
+    icons: { icon: settings.faviconImg || "/icon.png" }
+  };
+}
 
 export const viewport = { themeColor: "#D9611F" };
 

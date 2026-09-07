@@ -3,7 +3,7 @@ import SiteApp from "@/components/SiteApp";
 
 export const dynamic = "force-dynamic";
 
-export default function HomePage() {
-  const content = readContent();
+export default async function HomePage() {
+  const content = await readContent();
   return <SiteApp content={content} />;
 }

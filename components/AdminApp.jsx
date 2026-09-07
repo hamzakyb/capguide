@@ -37,7 +37,11 @@ export default function AdminApp() {
   const toastT = useRef(null);
   const fileRef = useRef(null);
   const jsonRef = useRef(null);
+  const logoFileRef = useRef(null);
+  const faviconFileRef = useRef(null);
   const [uploading, setUploading] = useState(false);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [uploadingFavicon, setUploadingFavicon] = useState(false);
 
   function showToast(msg, err) {
     setToast({ msg, err: !!err });
@@ -239,6 +243,38 @@ export default function AdminApp() {
     } finally {
       setUploading(false);
     }
+  }
+
+  async function uploadTo(file, field, setBusy) {
+    setBusy(true);
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      const res = await fetch("/api/upload", { method: "POST", body: form });
+      const out = await res.json();
+      if (res.ok && out.url) {
+        updateSettings({ [field]: out.url });
+        showToast("Yüklendi.");
+      } else {
+        showToast(out.error || "Yükleme başarısız.", true);
+      }
+    } catch {
+      showToast("Yükleme başarısız.", true);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function handleLogoFile(e) {
+    const f = e.target.files?.[0];
+    e.target.value = "";
+    if (f) uploadTo(f, "logoImg", setUploadingLogo);
+  }
+
+  function handleFaviconFile(e) {
+    const f = e.target.files?.[0];
+    e.target.value = "";
+    if (f) uploadTo(f, "faviconImg", setUploadingFavicon);
   }
 
   function updateFeatured(i, patch) {
@@ -544,6 +580,46 @@ export default function AdminApp() {
                 <div className="a-field a-full">
                   <label>Genel WhatsApp mesajı (butonlar için)</label>
                   <input value={data.settings.defaultMsg} onChange={(e) => updateSettings({ defaultMsg: e.target.value })} />
+                </div>
+                <div className="a-field">
+                  <label>Logo</label>
+                  <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+                    {data.settings.logoImg ? (
+                      /* eslint-disable-next-line @next/next/no-img-element */
+                      <img src={data.settings.logoImg} alt="" style={{ height: 40, borderRadius: 6, background: "#241206" }} />
+                    ) : null}
+                    <input
+                      style={{ flex: 1, minWidth: 180 }}
+                      value={data.settings.logoImg}
+                      onChange={(e) => updateSettings({ logoImg: e.target.value })}
+                      placeholder="/assets/img/logo.png"
+                    />
+                    <input type="file" accept="image/*" hidden ref={logoFileRef} onChange={handleLogoFile} />
+                    <button type="button" className="a-btn a-sm" onClick={() => logoFileRef.current?.click()} disabled={uploadingLogo}>
+                      {uploadingLogo ? "Yükleniyor…" : "Bilgisayardan yükle"}
+                    </button>
+                  </div>
+                  <span className="a-hint">Boş bırakılırsa varsayılan &quot;CAPGUIDE&quot; yazı logosu gösterilir.</span>
+                </div>
+                <div className="a-field">
+                  <label>Favicon (sekme ikonu)</label>
+                  <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+                    {data.settings.faviconImg ? (
+                      /* eslint-disable-next-line @next/next/no-img-element */
+                      <img src={data.settings.faviconImg} alt="" style={{ height: 32, width: 32, borderRadius: 6, objectFit: "cover", background: "#241206" }} />
+                    ) : null}
+                    <input
+                      style={{ flex: 1, minWidth: 180 }}
+                      value={data.settings.faviconImg}
+                      onChange={(e) => updateSettings({ faviconImg: e.target.value })}
+                      placeholder="/icon.png"
+                    />
+                    <input type="file" accept="image/*" hidden ref={faviconFileRef} onChange={handleFaviconFile} />
+                    <button type="button" className="a-btn a-sm" onClick={() => faviconFileRef.current?.click()} disabled={uploadingFavicon}>
+                      {uploadingFavicon ? "Yükleniyor…" : "Bilgisayardan yükle"}
+                    </button>
+                  </div>
+                  <span className="a-hint">Kare bir görsel önerilir. Değişiklik siteye kaydettikten sonra yansır.</span>
                 </div>
               </div>
               <p className="a-hint" style={{ marginTop: 14 }}>

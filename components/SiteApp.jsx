@@ -108,7 +108,7 @@ export default function SiteApp({ content }) {
       <header className={"site-header" + (scrolled ? " scrolled" : "")} id="header">
         <div className="wrap header-inner">
           <a href="#home" className="brand" aria-label="Capguide Travel">
-<BrandLogo />
+<BrandLogo src={settings.logoImg} />
           </a>
 
           <nav className={"nav" + (menuOpen ? " open" : "")} id="nav">
@@ -446,7 +446,7 @@ export default function SiteApp({ content }) {
       <footer className="footer">
         <div className="wrap footer-inner">
           <a href="#home" className="brand footer-brand">
-<BrandLogo />
+<BrandLogo src={settings.logoImg} />
           </a>
           <nav className="footer-nav">
             {NAV.map((n) => (

@@ -2,22 +2,24 @@
 
 import { useEffect, useState } from "react";
 
-export default function BrandLogo({ className }) {
+export default function BrandLogo({ className, src }) {
   const [hasLogo, setHasLogo] = useState(null);
+  const fallbackSrc = "/assets/img/logo.png";
+  const logoSrc = src || fallbackSrc;
 
   useEffect(() => {
     let alive = true;
     const img = new window.Image();
     img.onload = () => alive && setHasLogo(true);
     img.onerror = () => alive && setHasLogo(false);
-    img.src = "/assets/img/logo.png";
+    img.src = logoSrc;
     return () => {
       alive = false;
     };
-  }, []);
+  }, [logoSrc]);
 
   if (hasLogo) {
-    return <img src="/assets/img/logo.png" alt="Capguide Travel" className={"brand-img " + (className || "")} />;
+    return <img src={logoSrc} alt="Capguide Travel" className={"brand-img " + (className || "")} />;
   }
 
   return (
