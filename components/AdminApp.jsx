@@ -40,9 +40,16 @@ export default function AdminApp() {
   const jsonRef = useRef(null);
   const logoFileRef = useRef(null);
   const faviconFileRef = useRef(null);
+  const heroFileRef = useRef(null);
+  const aboutFileRef = useRef(null);
   const [uploading, setUploading] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [uploadingFavicon, setUploadingFavicon] = useState(false);
+  const [uploadingHero, setUploadingHero] = useState(false);
+  const [uploadingAbout, setUploadingAbout] = useState(false);
+
+  const [stats, setStats] = useState(null);
+  const [statsLoading, setStatsLoading] = useState(false);
 
   const [curPass, setCurPass] = useState("");
   const [newPass, setNewPass] = useState("");
@@ -133,6 +140,20 @@ export default function AdminApp() {
     return () => document.removeEventListener("keydown", onKey);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
+
+  useEffect(() => {
+    if (page !== "stats" || !authed) return;
+    setStatsLoading(true);
+    fetch("/api/stats")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.ok) setStats(d.stats);
+        else showToast(d.error || "İstatistikler yüklenemedi.", true);
+      })
+      .catch(() => showToast("İstatistikler yüklenemedi.", true))
+      .finally(() => setStatsLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, authed]);
 
   if (!data || checking) {
     return (
@@ -288,6 +309,18 @@ export default function AdminApp() {
     if (f) uploadTo(f, "faviconImg", setUploadingFavicon);
   }
 
+  function handleHeroFile(e) {
+    const f = e.target.files?.[0];
+    e.target.value = "";
+    if (f) uploadTo(f, "heroImg", setUploadingHero);
+  }
+
+  function handleAboutFile(e) {
+    const f = e.target.files?.[0];
+    e.target.value = "";
+    if (f) uploadTo(f, "aboutImg", setUploadingAbout);
+  }
+
   async function changePassword(e) {
     e.preventDefault();
     setPassErr("");
@@ -393,6 +426,9 @@ export default function AdminApp() {
         </button>
         <button className={"a-tab" + (page === "settings" ? " a-on" : "")} onClick={() => setPage("settings")}>
           ⚙️ Genel Ayarlar
+        </button>
+        <button className={"a-tab" + (page === "stats" ? " a-on" : "")} onClick={() => setPage("stats")}>
+          📊 İstatistikler
         </button>
         <button className={"a-tab" + (page === "publish" ? " a-on" : "")} onClick={() => setPage("publish")}>
           🚀 Yayınla
@@ -618,11 +654,37 @@ export default function AdminApp() {
                 </div>
                 <div className="a-field">
                   <label>Ana (hero) fotoğrafı</label>
-                  <input value={data.settings.heroImg} onChange={(e) => updateSettings({ heroImg: e.target.value })} />
+                  <DropZone onFile={(f) => uploadTo(f, "heroImg", setUploadingHero)} disabled={uploadingHero}>
+                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                      <input
+                        style={{ flex: 1, minWidth: 180 }}
+                        value={data.settings.heroImg}
+                        onChange={(e) => updateSettings({ heroImg: e.target.value })}
+                      />
+                      <input type="file" accept="image/*" hidden ref={heroFileRef} onChange={handleHeroFile} />
+                      <button type="button" className="a-btn a-sm" onClick={() => heroFileRef.current?.click()} disabled={uploadingHero}>
+                        {uploadingHero ? "Yükleniyor…" : "Bilgisayardan yükle"}
+                      </button>
+                    </div>
+                    <span className="a-hint">Sürükleyip bırakabilirsiniz.</span>
+                  </DropZone>
                 </div>
                 <div className="a-field">
                   <label>Hakkımızda fotoğrafı</label>
-                  <input value={data.settings.aboutImg} onChange={(e) => updateSettings({ aboutImg: e.target.value })} />
+                  <DropZone onFile={(f) => uploadTo(f, "aboutImg", setUploadingAbout)} disabled={uploadingAbout}>
+                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                      <input
+                        style={{ flex: 1, minWidth: 180 }}
+                        value={data.settings.aboutImg}
+                        onChange={(e) => updateSettings({ aboutImg: e.target.value })}
+                      />
+                      <input type="file" accept="image/*" hidden ref={aboutFileRef} onChange={handleAboutFile} />
+                      <button type="button" className="a-btn a-sm" onClick={() => aboutFileRef.current?.click()} disabled={uploadingAbout}>
+                        {uploadingAbout ? "Yükleniyor…" : "Bilgisayardan yükle"}
+                      </button>
+                    </div>
+                    <span className="a-hint">Sürükleyip bırakabilirsiniz.</span>
+                  </DropZone>
                 </div>
                 <div className="a-field a-full">
                   <label>Genel WhatsApp mesajı (butonlar için)</label>
@@ -675,6 +737,31 @@ export default function AdminApp() {
               </div>
             </div>
 
+            <div className="a-card" style={{ maxWidth: 820, marginTop: 20 }}>
+              <h3 style={{ marginTop: 0 }}>SEO (Arama Motoru Ayarları)</h3>
+              <p className="a-hint" style={{ marginTop: -6, marginBottom: 16 }}>
+                Google gibi arama motorlarında ve sosyal medyada paylaşıldığında görünen başlık ve açıklama.
+              </p>
+              <div className="a-grid-form">
+                <div className="a-field a-full">
+                  <label>Sayfa Başlığı (SEO Title)</label>
+                  <input
+                    value={data.settings.seoTitle}
+                    onChange={(e) => updateSettings({ seoTitle: e.target.value })}
+                    placeholder="Capguide Travel — Discover Cappadocia"
+                  />
+                </div>
+                <div className="a-field a-full">
+                  <label>Meta Açıklama (SEO Description)</label>
+                  <textarea
+                    value={data.settings.seoDescription}
+                    onChange={(e) => updateSettings({ seoDescription: e.target.value })}
+                    placeholder="Capguide Travel — Tours, adventures, experiences and workshops in Cappadocia."
+                  />
+                </div>
+              </div>
+            </div>
+
             <div className="a-card" style={{ maxWidth: 420, marginTop: 20 }}>
               <h3 style={{ marginTop: 0 }}>Panel Şifresini Değiştir</h3>
               <form onSubmit={changePassword} className="a-grid-form" style={{ gridTemplateColumns: "1fr" }}>
@@ -696,6 +783,60 @@ export default function AdminApp() {
                 </button>
               </form>
             </div>
+          </section>
+        )}
+
+        {page === "stats" && (
+          <section className="a-page a-on">
+            <div className="a-page-head">
+              <div>
+                <h2>İstatistikler</h2>
+                <p>Ziyaret ve WhatsApp tıklama özetleri.</p>
+              </div>
+            </div>
+
+            {statsLoading && !stats ? (
+              <p className="a-hint">Yükleniyor…</p>
+            ) : stats ? (
+              <>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(180px,1fr))", gap: 14, marginBottom: 20 }}>
+                  <div className="a-card">
+                    <span className="a-hint">TOPLAM ZİYARET</span>
+                    <h2 style={{ fontSize: 30, marginTop: 6 }}>{stats.pageviewsTotal}</h2>
+                  </div>
+                  <div className="a-card">
+                    <span className="a-hint">SON 7 GÜN ZİYARET</span>
+                    <h2 style={{ fontSize: 30, marginTop: 6 }}>{stats.pageviews7d}</h2>
+                  </div>
+                  <div className="a-card">
+                    <span className="a-hint">SON 30 GÜN ZİYARET</span>
+                    <h2 style={{ fontSize: 30, marginTop: 6 }}>{stats.pageviews30d}</h2>
+                  </div>
+                  <div className="a-card">
+                    <span className="a-hint">SON 30 GÜN WHATSAPP TIKLAMASI</span>
+                    <h2 style={{ fontSize: 30, marginTop: 6 }}>{stats.tourClicks30d}</h2>
+                  </div>
+                </div>
+
+                <div className="a-card" style={{ maxWidth: 620 }}>
+                  <h3 style={{ marginTop: 0 }}>En Çok İlgi Gören Turlar (son 30 gün)</h3>
+                  {stats.topTours.length === 0 ? (
+                    <p className="a-hint">Henüz veri yok.</p>
+                  ) : (
+                    <div style={{ display: "grid", gap: 10 }}>
+                      {stats.topTours.map((t) => (
+                        <div key={t.name} style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center" }}>
+                          <span>{t.name}</span>
+                          <span className="a-tag">{t.count}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </>
+            ) : (
+              <p className="a-hint">Veri yok.</p>
+            )}
           </section>
         )}
 

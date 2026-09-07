@@ -17,3 +17,13 @@ create table if not exists public.admin_auth (
 insert into public.admin_auth (id, password_hash)
 values (1, '289edbec108e8caacf30d88a14b21e55:9d5d533ba5e3eb3519ce546b25c9747dcdcb4a06265c2f9ba4a5bac1c06b5024cd19e1808539af045d0ebde0b083a4f2e9a2393b5683720efde7eb3d38f779ab')
 on conflict (id) do nothing;
+
+create table if not exists public.analytics_events (
+  id bigserial primary key,
+  type text not null,
+  tour_name text,
+  created_at timestamptz default now()
+);
+
+create index if not exists analytics_events_type_created_idx
+  on public.analytics_events (type, created_at);

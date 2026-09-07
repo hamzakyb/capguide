@@ -56,6 +56,14 @@ export default function SiteApp({ content }) {
   const defaultMsg = settings.defaultMsg;
   const wa = (msg) => waLink(num, msg || defaultMsg);
 
+  function trackClick(tourName) {
+    fetch("/api/track", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type: "tour_click", tourName })
+    }).catch(() => {});
+  }
+
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [filter, setFilter] = useState("all");
@@ -65,6 +73,14 @@ export default function SiteApp({ content }) {
   );
 
   const rootRef = useReveal([tours.length, filter]);
+
+  useEffect(() => {
+    fetch("/api/track", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type: "pageview" })
+    }).catch(() => {});
+  }, []);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -326,7 +342,10 @@ export default function SiteApp({ content }) {
                         href={wa(t.wa)}
                         target="_blank"
                         rel="noopener noreferrer"
-                        onClick={(e) => e.stopPropagation()}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          trackClick(t.name);
+                        }}
                       >
                         <WhatsAppIcon width={16} height={16} />
                         Ask on WhatsApp
@@ -360,6 +379,7 @@ export default function SiteApp({ content }) {
                   href={wa(t ? t.wa : "Hello, I would like to get information about " + f.title + ".")}
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={() => trackClick(f.name)}
                 >
                   <div className="ph-fallback"></div>
                   <img

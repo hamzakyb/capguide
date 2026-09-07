@@ -17,8 +17,8 @@ const jost = Jost({
 export async function generateMetadata() {
   const { settings } = await readContent();
   return {
-    title: "Capguide Travel — Discover Cappadocia",
-    description: "Capguide Travel — Tours, adventures, experiences and workshops in Cappadocia. Plan your experience on WhatsApp.",
+    title: settings.seoTitle || "Capguide Travel — Discover Cappadocia",
+    description: settings.seoDescription || "Capguide Travel — Tours, adventures, experiences and workshops in Cappadocia. Plan your experience on WhatsApp.",
     icons: { icon: settings.faviconImg || "/icon.png" }
   };
 }
