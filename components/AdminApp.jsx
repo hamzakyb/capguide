@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import DropZone from "./DropZone";
 
 const CAT_OPTIONS = [
   { v: "tours", l: "Turlar" },
@@ -42,6 +43,12 @@ export default function AdminApp() {
   const [uploading, setUploading] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [uploadingFavicon, setUploadingFavicon] = useState(false);
+
+  const [curPass, setCurPass] = useState("");
+  const [newPass, setNewPass] = useState("");
+  const [newPass2, setNewPass2] = useState("");
+  const [passErr, setPassErr] = useState("");
+  const [changingPass, setChangingPass] = useState(false);
 
   function showToast(msg, err) {
     setToast({ msg, err: !!err });
@@ -222,9 +229,7 @@ export default function AdminApp() {
     updateTour({ wa: "Hello, I would like to get information about " + (tour.name || "your tours") + "." });
   }
 
-  async function handleFile(e) {
-    const f = e.target.files?.[0];
-    e.target.value = "";
+  async function uploadTourFile(f) {
     if (!f || !tour) return;
     setUploading(true);
     try {
@@ -243,6 +248,12 @@ export default function AdminApp() {
     } finally {
       setUploading(false);
     }
+  }
+
+  function handleFile(e) {
+    const f = e.target.files?.[0];
+    e.target.value = "";
+    uploadTourFile(f);
   }
 
   async function uploadTo(file, field, setBusy) {
@@ -275,6 +286,40 @@ export default function AdminApp() {
     const f = e.target.files?.[0];
     e.target.value = "";
     if (f) uploadTo(f, "faviconImg", setUploadingFavicon);
+  }
+
+  async function changePassword(e) {
+    e.preventDefault();
+    setPassErr("");
+    if (newPass.length < 6) {
+      setPassErr("Yeni şifre en az 6 karakter olmalı.");
+      return;
+    }
+    if (newPass !== newPass2) {
+      setPassErr("Yeni şifreler eşleşmiyor.");
+      return;
+    }
+    setChangingPass(true);
+    try {
+      const res = await fetch("/api/password", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ currentPassword: curPass, newPassword: newPass })
+      });
+      const out = await res.json().catch(() => ({}));
+      if (res.ok) {
+        setCurPass("");
+        setNewPass("");
+        setNewPass2("");
+        showToast("Şifre değiştirildi.");
+      } else {
+        setPassErr(out.error || "Şifre değiştirilemedi.");
+      }
+    } catch {
+      setPassErr("Şifre değiştirilemedi.");
+    } finally {
+      setChangingPass(false);
+    }
   }
 
   function updateFeatured(i, patch) {
@@ -367,7 +412,7 @@ export default function AdminApp() {
                 <h2>Turlar &amp; Aktiviteler</h2>
                 <p>Soldaki listeden seçin, sağdaki alanları düzenleyin. Sıralama siteye birebir yansır.</p>
               </div>
-              <div style={{ display: "flex", gap: 8 }}>
+              <div className="a-page-actions" style={{ display: "flex", gap: 8 }}>
                 <button className="a-btn" onClick={dupTour}>Kopyala</button>
                 <button className="a-btn a-d" onClick={delTour}>Sil</button>
                 <button className="a-btn a-p" onClick={addTour}>+ Yeni Ekle</button>
@@ -436,19 +481,21 @@ export default function AdminApp() {
                       </div>
                       <div className="a-field a-full">
                         <label>Fotoğraf</label>
-                        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                          <input
-                            style={{ flex: 1, minWidth: 220 }}
-                            value={tour.img}
-                            onChange={(e) => updateTour({ img: e.target.value })}
-                            placeholder="/assets/img/red-tour.jpg"
-                          />
-                          <input type="file" accept="image/*" hidden ref={fileRef} onChange={handleFile} />
-                          <button type="button" className="a-btn a-sm" onClick={() => fileRef.current?.click()} disabled={uploading}>
-                            {uploading ? "Yükleniyor…" : "Bilgisayardan yükle"}
-                          </button>
-                        </div>
-                        <span className="a-hint">Seçtiğiniz fotoğraf otomatik olarak sunucuya yüklenir ve buraya yazılır.</span>
+                        <DropZone onFile={uploadTourFile} disabled={uploading}>
+                          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                            <input
+                              style={{ flex: 1, minWidth: 220 }}
+                              value={tour.img}
+                              onChange={(e) => updateTour({ img: e.target.value })}
+                              placeholder="/assets/img/red-tour.jpg"
+                            />
+                            <input type="file" accept="image/*" hidden ref={fileRef} onChange={handleFile} />
+                            <button type="button" className="a-btn a-sm" onClick={() => fileRef.current?.click()} disabled={uploading}>
+                              {uploading ? "Yükleniyor…" : "Bilgisayardan yükle"}
+                            </button>
+                          </div>
+                          <span className="a-hint">Seçtiğiniz fotoğrafı buraya sürükleyip bırakabilir veya bilgisayarınızdan seçebilirsiniz.</span>
+                        </DropZone>
                       </div>
                       <div className="a-field a-full">
                         <label>WhatsApp Mesajı</label>
@@ -583,49 +630,71 @@ export default function AdminApp() {
                 </div>
                 <div className="a-field">
                   <label>Logo</label>
-                  <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-                    {data.settings.logoImg ? (
-                      /* eslint-disable-next-line @next/next/no-img-element */
-                      <img src={data.settings.logoImg} alt="" style={{ height: 40, borderRadius: 6, background: "#241206" }} />
-                    ) : null}
-                    <input
-                      style={{ flex: 1, minWidth: 180 }}
-                      value={data.settings.logoImg}
-                      onChange={(e) => updateSettings({ logoImg: e.target.value })}
-                      placeholder="/assets/img/logo.png"
-                    />
-                    <input type="file" accept="image/*" hidden ref={logoFileRef} onChange={handleLogoFile} />
-                    <button type="button" className="a-btn a-sm" onClick={() => logoFileRef.current?.click()} disabled={uploadingLogo}>
-                      {uploadingLogo ? "Yükleniyor…" : "Bilgisayardan yükle"}
-                    </button>
-                  </div>
-                  <span className="a-hint">Boş bırakılırsa varsayılan &quot;CAPGUIDE&quot; yazı logosu gösterilir.</span>
+                  <DropZone onFile={(f) => uploadTo(f, "logoImg", setUploadingLogo)} disabled={uploadingLogo}>
+                    <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+                      {data.settings.logoImg ? (
+                        /* eslint-disable-next-line @next/next/no-img-element */
+                        <img src={data.settings.logoImg} alt="" style={{ height: 40, borderRadius: 6, background: "#241206" }} />
+                      ) : null}
+                      <input
+                        style={{ flex: 1, minWidth: 180 }}
+                        value={data.settings.logoImg}
+                        onChange={(e) => updateSettings({ logoImg: e.target.value })}
+                        placeholder="/assets/img/logo.png"
+                      />
+                      <input type="file" accept="image/*" hidden ref={logoFileRef} onChange={handleLogoFile} />
+                      <button type="button" className="a-btn a-sm" onClick={() => logoFileRef.current?.click()} disabled={uploadingLogo}>
+                        {uploadingLogo ? "Yükleniyor…" : "Bilgisayardan yükle"}
+                      </button>
+                    </div>
+                    <span className="a-hint">Sürükleyip bırakabilirsiniz. Boş bırakılırsa varsayılan &quot;CAPGUIDE&quot; yazı logosu gösterilir.</span>
+                  </DropZone>
                 </div>
                 <div className="a-field">
                   <label>Favicon (sekme ikonu)</label>
-                  <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-                    {data.settings.faviconImg ? (
-                      /* eslint-disable-next-line @next/next/no-img-element */
-                      <img src={data.settings.faviconImg} alt="" style={{ height: 32, width: 32, borderRadius: 6, objectFit: "cover", background: "#241206" }} />
-                    ) : null}
-                    <input
-                      style={{ flex: 1, minWidth: 180 }}
-                      value={data.settings.faviconImg}
-                      onChange={(e) => updateSettings({ faviconImg: e.target.value })}
-                      placeholder="/icon.png"
-                    />
-                    <input type="file" accept="image/*" hidden ref={faviconFileRef} onChange={handleFaviconFile} />
-                    <button type="button" className="a-btn a-sm" onClick={() => faviconFileRef.current?.click()} disabled={uploadingFavicon}>
-                      {uploadingFavicon ? "Yükleniyor…" : "Bilgisayardan yükle"}
-                    </button>
-                  </div>
-                  <span className="a-hint">Kare bir görsel önerilir. Değişiklik siteye kaydettikten sonra yansır.</span>
+                  <DropZone onFile={(f) => uploadTo(f, "faviconImg", setUploadingFavicon)} disabled={uploadingFavicon}>
+                    <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+                      {data.settings.faviconImg ? (
+                        /* eslint-disable-next-line @next/next/no-img-element */
+                        <img src={data.settings.faviconImg} alt="" style={{ height: 32, width: 32, borderRadius: 6, objectFit: "cover", background: "#241206" }} />
+                      ) : null}
+                      <input
+                        style={{ flex: 1, minWidth: 180 }}
+                        value={data.settings.faviconImg}
+                        onChange={(e) => updateSettings({ faviconImg: e.target.value })}
+                        placeholder="/icon.png"
+                      />
+                      <input type="file" accept="image/*" hidden ref={faviconFileRef} onChange={handleFaviconFile} />
+                      <button type="button" className="a-btn a-sm" onClick={() => faviconFileRef.current?.click()} disabled={uploadingFavicon}>
+                        {uploadingFavicon ? "Yükleniyor…" : "Bilgisayardan yükle"}
+                      </button>
+                    </div>
+                    <span className="a-hint">Sürükleyip bırakabilirsiniz. Kare bir görsel önerilir.</span>
+                  </DropZone>
                 </div>
               </div>
-              <p className="a-hint" style={{ marginTop: 14 }}>
-                Panel şifresini değiştirmek için sunucudaki <code>ADMIN_PASSWORD</code> ortam değişkenini ayarlayın
-                (bkz. <code>.env.local</code>).
-              </p>
+            </div>
+
+            <div className="a-card" style={{ maxWidth: 420, marginTop: 20 }}>
+              <h3 style={{ marginTop: 0 }}>Panel Şifresini Değiştir</h3>
+              <form onSubmit={changePassword} className="a-grid-form" style={{ gridTemplateColumns: "1fr" }}>
+                <div className="a-field">
+                  <label>Mevcut Şifre</label>
+                  <input type="password" value={curPass} onChange={(e) => setCurPass(e.target.value)} autoComplete="current-password" />
+                </div>
+                <div className="a-field">
+                  <label>Yeni Şifre</label>
+                  <input type="password" value={newPass} onChange={(e) => setNewPass(e.target.value)} autoComplete="new-password" />
+                </div>
+                <div className="a-field">
+                  <label>Yeni Şifre (tekrar)</label>
+                  <input type="password" value={newPass2} onChange={(e) => setNewPass2(e.target.value)} autoComplete="new-password" />
+                </div>
+                {passErr ? <div className="a-login-err">{passErr}</div> : null}
+                <button className="a-btn a-p" type="submit" disabled={changingPass}>
+                  {changingPass ? "Değiştiriliyor…" : "Şifreyi Değiştir"}
+                </button>
+              </form>
             </div>
           </section>
         )}
