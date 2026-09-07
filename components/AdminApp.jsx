@@ -1,7 +1,25 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import DropZone from "./DropZone";
+import ImageUploadField from "./ImageUploadField";
+import {
+  Compass,
+  Star,
+  Settings,
+  BarChart3,
+  Rocket,
+  ExternalLink,
+  LogOut,
+  ChevronUp,
+  ChevronDown,
+  Save,
+  Copy,
+  Trash2,
+  Plus,
+  Upload,
+  Download,
+  Wand2
+} from "lucide-react";
 
 const CAT_OPTIONS = [
   { v: "tours", l: "Turlar" },
@@ -36,20 +54,11 @@ export default function AdminApp() {
   const [dirty, setDirty] = useState(false);
   const [toast, setToast] = useState(null);
   const toastT = useRef(null);
-  const fileRef = useRef(null);
   const jsonRef = useRef(null);
-  const logoFileRef = useRef(null);
-  const faviconFileRef = useRef(null);
-  const heroFileRef = useRef(null);
-  const aboutFileRef = useRef(null);
-  const [uploading, setUploading] = useState(false);
-  const [uploadingLogo, setUploadingLogo] = useState(false);
-  const [uploadingFavicon, setUploadingFavicon] = useState(false);
-  const [uploadingHero, setUploadingHero] = useState(false);
-  const [uploadingAbout, setUploadingAbout] = useState(false);
 
   const [stats, setStats] = useState(null);
   const [statsLoading, setStatsLoading] = useState(false);
+  const [statsRange, setStatsRange] = useState("30d");
 
   const [curPass, setCurPass] = useState("");
   const [newPass, setNewPass] = useState("");
@@ -250,77 +259,6 @@ export default function AdminApp() {
     updateTour({ wa: "Hello, I would like to get information about " + (tour.name || "your tours") + "." });
   }
 
-  async function uploadTourFile(f) {
-    if (!f || !tour) return;
-    setUploading(true);
-    try {
-      const form = new FormData();
-      form.append("file", f);
-      const res = await fetch("/api/upload", { method: "POST", body: form });
-      const out = await res.json();
-      if (res.ok && out.url) {
-        updateTour({ img: out.url });
-        showToast("Fotoğraf yüklendi.");
-      } else {
-        showToast(out.error || "Yükleme başarısız.", true);
-      }
-    } catch {
-      showToast("Yükleme başarısız.", true);
-    } finally {
-      setUploading(false);
-    }
-  }
-
-  function handleFile(e) {
-    const f = e.target.files?.[0];
-    e.target.value = "";
-    uploadTourFile(f);
-  }
-
-  async function uploadTo(file, field, setBusy) {
-    setBusy(true);
-    try {
-      const form = new FormData();
-      form.append("file", file);
-      const res = await fetch("/api/upload", { method: "POST", body: form });
-      const out = await res.json();
-      if (res.ok && out.url) {
-        updateSettings({ [field]: out.url });
-        showToast("Yüklendi.");
-      } else {
-        showToast(out.error || "Yükleme başarısız.", true);
-      }
-    } catch {
-      showToast("Yükleme başarısız.", true);
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  function handleLogoFile(e) {
-    const f = e.target.files?.[0];
-    e.target.value = "";
-    if (f) uploadTo(f, "logoImg", setUploadingLogo);
-  }
-
-  function handleFaviconFile(e) {
-    const f = e.target.files?.[0];
-    e.target.value = "";
-    if (f) uploadTo(f, "faviconImg", setUploadingFavicon);
-  }
-
-  function handleHeroFile(e) {
-    const f = e.target.files?.[0];
-    e.target.value = "";
-    if (f) uploadTo(f, "heroImg", setUploadingHero);
-  }
-
-  function handleAboutFile(e) {
-    const f = e.target.files?.[0];
-    e.target.value = "";
-    if (f) uploadTo(f, "aboutImg", setUploadingAbout);
-  }
-
   async function changePassword(e) {
     e.preventDefault();
     setPassErr("");
@@ -419,23 +357,23 @@ export default function AdminApp() {
           </div>
         </div>
         <button className={"a-tab" + (page === "tours" ? " a-on" : "")} onClick={() => setPage("tours")}>
-          🗂️ Turlar &amp; Aktiviteler
+          <Compass size={17} /> Turlar &amp; Aktiviteler
         </button>
         <button className={"a-tab" + (page === "featured" ? " a-on" : "")} onClick={() => setPage("featured")}>
-          ⭐ Öne Çıkanlar
+          <Star size={17} /> Öne Çıkanlar
         </button>
         <button className={"a-tab" + (page === "settings" ? " a-on" : "")} onClick={() => setPage("settings")}>
-          ⚙️ Genel Ayarlar
+          <Settings size={17} /> Genel Ayarlar
         </button>
         <button className={"a-tab" + (page === "stats" ? " a-on" : "")} onClick={() => setPage("stats")}>
-          📊 İstatistikler
+          <BarChart3 size={17} /> İstatistikler
         </button>
         <button className={"a-tab" + (page === "publish" ? " a-on" : "")} onClick={() => setPage("publish")}>
-          🚀 Yayınla
+          <Rocket size={17} /> Yayınla
         </button>
         <div className="a-side-foot">
-          <a href="/" target="_blank">↗ Siteyi aç</a>
-          <button className="a-tab" onClick={logout} style={{ padding: "8px 12px" }}>⎋ Çıkış</button>
+          <a href="/" target="_blank"><ExternalLink size={14} /> Siteyi aç</a>
+          <button className="a-tab" onClick={logout} style={{ padding: "8px 12px" }}><LogOut size={15} /> Çıkış</button>
           <span>Capguide Travel · 2026</span>
         </div>
       </aside>
@@ -449,9 +387,9 @@ export default function AdminApp() {
                 <p>Soldaki listeden seçin, sağdaki alanları düzenleyin. Sıralama siteye birebir yansır.</p>
               </div>
               <div className="a-page-actions" style={{ display: "flex", gap: 8 }}>
-                <button className="a-btn" onClick={dupTour}>Kopyala</button>
-                <button className="a-btn a-d" onClick={delTour}>Sil</button>
-                <button className="a-btn a-p" onClick={addTour}>+ Yeni Ekle</button>
+                <button className="a-btn" onClick={dupTour}><Copy size={15} /> Kopyala</button>
+                <button className="a-btn a-d" onClick={delTour}><Trash2 size={15} /> Sil</button>
+                <button className="a-btn a-p" onClick={addTour}><Plus size={15} /> Yeni Ekle</button>
               </div>
             </div>
 
@@ -468,8 +406,8 @@ export default function AdminApp() {
                       </div>
                       {t.badge ? <span className="a-tag">{t.badge}</span> : null}
                       <div className="a-mv">
-                        <button onClick={(e) => { e.stopPropagation(); move(i, i - 1); }} title="Yukarı">▲</button>
-                        <button onClick={(e) => { e.stopPropagation(); move(i, i + 1); }} title="Aşağı">▼</button>
+                        <button onClick={(e) => { e.stopPropagation(); move(i, i - 1); }} title="Yukarı"><ChevronUp size={15} /></button>
+                        <button onClick={(e) => { e.stopPropagation(); move(i, i + 1); }} title="Aşağı"><ChevronDown size={15} /></button>
                       </div>
                     </div>
                   ))}
@@ -515,24 +453,11 @@ export default function AdminApp() {
                         <label>Kısa Açıklama (kartın arkası)</label>
                         <textarea value={tour.desc} onChange={(e) => updateTour({ desc: e.target.value })} placeholder="Discover Cappadocia's iconic valleys..." />
                       </div>
-                      <div className="a-field a-full">
-                        <label>Fotoğraf</label>
-                        <DropZone onFile={uploadTourFile} disabled={uploading}>
-                          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                            <input
-                              style={{ flex: 1, minWidth: 220 }}
-                              value={tour.img}
-                              onChange={(e) => updateTour({ img: e.target.value })}
-                              placeholder="/assets/img/red-tour.jpg"
-                            />
-                            <input type="file" accept="image/*" hidden ref={fileRef} onChange={handleFile} />
-                            <button type="button" className="a-btn a-sm" onClick={() => fileRef.current?.click()} disabled={uploading}>
-                              {uploading ? "Yükleniyor…" : "Bilgisayardan yükle"}
-                            </button>
-                          </div>
-                          <span className="a-hint">Seçtiğiniz fotoğrafı buraya sürükleyip bırakabilir veya bilgisayarınızdan seçebilirsiniz.</span>
-                        </DropZone>
-                      </div>
+                      <ImageUploadField
+                        label="Fotoğraf"
+                        value={tour.img}
+                        onChange={(url) => updateTour({ img: url })}
+                      />
                       <div className="a-field a-full">
                         <label>WhatsApp Mesajı</label>
                         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
@@ -542,7 +467,7 @@ export default function AdminApp() {
                             onChange={(e) => updateTour({ wa: e.target.value })}
                             placeholder="Hello, I would like to get information about..."
                           />
-                          <button type="button" className="a-btn a-sm" onClick={genWa}>Otomatik yaz</button>
+                          <button type="button" className="a-btn a-sm" onClick={genWa}><Wand2 size={13} /> Otomatik yaz</button>
                         </div>
                       </div>
                     </div>
@@ -652,88 +577,32 @@ export default function AdminApp() {
                   <label>Başlık altı yazı</label>
                   <input value={data.settings.heroSub} onChange={(e) => updateSettings({ heroSub: e.target.value })} />
                 </div>
-                <div className="a-field">
-                  <label>Ana (hero) fotoğrafı</label>
-                  <DropZone onFile={(f) => uploadTo(f, "heroImg", setUploadingHero)} disabled={uploadingHero}>
-                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                      <input
-                        style={{ flex: 1, minWidth: 180 }}
-                        value={data.settings.heroImg}
-                        onChange={(e) => updateSettings({ heroImg: e.target.value })}
-                      />
-                      <input type="file" accept="image/*" hidden ref={heroFileRef} onChange={handleHeroFile} />
-                      <button type="button" className="a-btn a-sm" onClick={() => heroFileRef.current?.click()} disabled={uploadingHero}>
-                        {uploadingHero ? "Yükleniyor…" : "Bilgisayardan yükle"}
-                      </button>
-                    </div>
-                    <span className="a-hint">Sürükleyip bırakabilirsiniz.</span>
-                  </DropZone>
-                </div>
-                <div className="a-field">
-                  <label>Hakkımızda fotoğrafı</label>
-                  <DropZone onFile={(f) => uploadTo(f, "aboutImg", setUploadingAbout)} disabled={uploadingAbout}>
-                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                      <input
-                        style={{ flex: 1, minWidth: 180 }}
-                        value={data.settings.aboutImg}
-                        onChange={(e) => updateSettings({ aboutImg: e.target.value })}
-                      />
-                      <input type="file" accept="image/*" hidden ref={aboutFileRef} onChange={handleAboutFile} />
-                      <button type="button" className="a-btn a-sm" onClick={() => aboutFileRef.current?.click()} disabled={uploadingAbout}>
-                        {uploadingAbout ? "Yükleniyor…" : "Bilgisayardan yükle"}
-                      </button>
-                    </div>
-                    <span className="a-hint">Sürükleyip bırakabilirsiniz.</span>
-                  </DropZone>
-                </div>
+                <ImageUploadField
+                  label="Ana (hero) fotoğrafı"
+                  value={data.settings.heroImg}
+                  onChange={(url) => updateSettings({ heroImg: url })}
+                />
+                <ImageUploadField
+                  label="Hakkımızda fotoğrafı"
+                  value={data.settings.aboutImg}
+                  onChange={(url) => updateSettings({ aboutImg: url })}
+                />
                 <div className="a-field a-full">
                   <label>Genel WhatsApp mesajı (butonlar için)</label>
                   <input value={data.settings.defaultMsg} onChange={(e) => updateSettings({ defaultMsg: e.target.value })} />
                 </div>
-                <div className="a-field">
-                  <label>Logo</label>
-                  <DropZone onFile={(f) => uploadTo(f, "logoImg", setUploadingLogo)} disabled={uploadingLogo}>
-                    <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-                      {data.settings.logoImg ? (
-                        /* eslint-disable-next-line @next/next/no-img-element */
-                        <img src={data.settings.logoImg} alt="" style={{ height: 40, borderRadius: 6, background: "#241206" }} />
-                      ) : null}
-                      <input
-                        style={{ flex: 1, minWidth: 180 }}
-                        value={data.settings.logoImg}
-                        onChange={(e) => updateSettings({ logoImg: e.target.value })}
-                        placeholder="/assets/img/logo.png"
-                      />
-                      <input type="file" accept="image/*" hidden ref={logoFileRef} onChange={handleLogoFile} />
-                      <button type="button" className="a-btn a-sm" onClick={() => logoFileRef.current?.click()} disabled={uploadingLogo}>
-                        {uploadingLogo ? "Yükleniyor…" : "Bilgisayardan yükle"}
-                      </button>
-                    </div>
-                    <span className="a-hint">Sürükleyip bırakabilirsiniz. Boş bırakılırsa varsayılan &quot;CAPGUIDE&quot; yazı logosu gösterilir.</span>
-                  </DropZone>
-                </div>
-                <div className="a-field">
-                  <label>Favicon (sekme ikonu)</label>
-                  <DropZone onFile={(f) => uploadTo(f, "faviconImg", setUploadingFavicon)} disabled={uploadingFavicon}>
-                    <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-                      {data.settings.faviconImg ? (
-                        /* eslint-disable-next-line @next/next/no-img-element */
-                        <img src={data.settings.faviconImg} alt="" style={{ height: 32, width: 32, borderRadius: 6, objectFit: "cover", background: "#241206" }} />
-                      ) : null}
-                      <input
-                        style={{ flex: 1, minWidth: 180 }}
-                        value={data.settings.faviconImg}
-                        onChange={(e) => updateSettings({ faviconImg: e.target.value })}
-                        placeholder="/icon.png"
-                      />
-                      <input type="file" accept="image/*" hidden ref={faviconFileRef} onChange={handleFaviconFile} />
-                      <button type="button" className="a-btn a-sm" onClick={() => faviconFileRef.current?.click()} disabled={uploadingFavicon}>
-                        {uploadingFavicon ? "Yükleniyor…" : "Bilgisayardan yükle"}
-                      </button>
-                    </div>
-                    <span className="a-hint">Sürükleyip bırakabilirsiniz. Kare bir görsel önerilir.</span>
-                  </DropZone>
-                </div>
+                <ImageUploadField
+                  label="Logo"
+                  value={data.settings.logoImg}
+                  onChange={(url) => updateSettings({ logoImg: url })}
+                  hint='Boş bırakılırsa varsayılan "CAPGUIDE" yazı logosu gösterilir.'
+                />
+                <ImageUploadField
+                  label="Favicon (sekme ikonu)"
+                  value={data.settings.faviconImg}
+                  onChange={(url) => updateSettings({ faviconImg: url })}
+                  hint="Kare bir görsel önerilir."
+                />
               </div>
             </div>
 
@@ -813,25 +682,72 @@ export default function AdminApp() {
                     <h2 style={{ fontSize: 30, marginTop: 6 }}>{stats.pageviews30d}</h2>
                   </div>
                   <div className="a-card">
-                    <span className="a-hint">SON 30 GÜN WHATSAPP TIKLAMASI</span>
-                    <h2 style={{ fontSize: 30, marginTop: 6 }}>{stats.tourClicks30d}</h2>
+                    <span className="a-hint">TOPLAM WHATSAPP TIKLAMASI</span>
+                    <h2 style={{ fontSize: 30, marginTop: 6 }}>{stats.tourClicksTotal}</h2>
                   </div>
                 </div>
 
-                <div className="a-card" style={{ maxWidth: 620 }}>
-                  <h3 style={{ marginTop: 0 }}>En Çok İlgi Gören Turlar (son 30 gün)</h3>
-                  {stats.topTours.length === 0 ? (
+                <div className="a-card" style={{ marginBottom: 20 }}>
+                  <h3 style={{ marginTop: 0 }}>Son 14 Gün Ziyaret Grafiği</h3>
+                  {stats.dailyPageviews.every((d) => d.count === 0) ? (
                     <p className="a-hint">Henüz veri yok.</p>
                   ) : (
-                    <div style={{ display: "grid", gap: 10 }}>
-                      {stats.topTours.map((t) => (
-                        <div key={t.name} style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center" }}>
-                          <span>{t.name}</span>
-                          <span className="a-tag">{t.count}</span>
-                        </div>
-                      ))}
+                    <div className="a-chart">
+                      {stats.dailyPageviews.map((d) => {
+                        const max = Math.max(1, ...stats.dailyPageviews.map((x) => x.count));
+                        const pct = Math.max(3, Math.round((d.count / max) * 100));
+                        const label = new Date(d.date + "T00:00:00").toLocaleDateString("tr-TR", { day: "2-digit", month: "2-digit" });
+                        return (
+                          <div className="a-chart-col" key={d.date} title={`${label}: ${d.count} ziyaret`}>
+                            <div className="a-chart-bar" style={{ height: pct + "%" }} />
+                            <span className="a-chart-label">{label}</span>
+                          </div>
+                        );
+                      })}
                     </div>
                   )}
+                </div>
+
+                <div className="a-card" style={{ maxWidth: 620 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
+                    <h3 style={{ margin: 0 }}>En Çok İlgi Gören Turlar</h3>
+                    <div style={{ display: "flex", gap: 6 }}>
+                      <button
+                        type="button"
+                        className={"a-btn a-sm" + (statsRange === "30d" ? " a-p" : "")}
+                        onClick={() => setStatsRange("30d")}
+                      >
+                        Son 30 gün
+                      </button>
+                      <button
+                        type="button"
+                        className={"a-btn a-sm" + (statsRange === "all" ? " a-p" : "")}
+                        onClick={() => setStatsRange("all")}
+                      >
+                        Tüm zamanlar
+                      </button>
+                    </div>
+                  </div>
+                  {(() => {
+                    const list = statsRange === "all" ? stats.topToursAllTime : stats.topTours30d;
+                    if (!list || list.length === 0) return <p className="a-hint" style={{ marginTop: 14 }}>Henüz veri yok.</p>;
+                    const max = Math.max(...list.map((t) => t.count));
+                    return (
+                      <div style={{ display: "grid", gap: 10, marginTop: 16 }}>
+                        {list.map((t) => (
+                          <div key={t.name}>
+                            <div style={{ display: "flex", justifyContent: "space-between", gap: 12, fontSize: 13, marginBottom: 4 }}>
+                              <span>{t.name}</span>
+                              <b>{t.count}</b>
+                            </div>
+                            <div className="a-bar-track">
+                              <div className="a-bar-fill" style={{ width: Math.max(4, Math.round((t.count / max) * 100)) + "%" }} />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  })()}
                 </div>
               </>
             ) : (
@@ -872,8 +788,8 @@ export default function AdminApp() {
                   <h4>Yedek &amp; Sıfırlama</h4>
                   <p>Tüm içeriği JSON olarak yedekleyebilir veya bir yedekten geri yükleyebilirsiniz.</p>
                   <p style={{ marginTop: 10, display: "flex", gap: 8, flexWrap: "wrap" }}>
-                    <button className="a-btn a-sm" onClick={exportJson}>Yedek İndir (JSON)</button>
-                    <button className="a-btn a-sm" onClick={() => jsonRef.current?.click()}>Yedekten Yükle</button>
+                    <button className="a-btn a-sm" onClick={exportJson}><Download size={14} /> Yedek İndir (JSON)</button>
+                    <button className="a-btn a-sm" onClick={() => jsonRef.current?.click()}><Upload size={14} /> Yedekten Yükle</button>
                   </p>
                   <input type="file" accept="application/json" hidden ref={jsonRef} onChange={importJson} />
                 </div>
@@ -893,7 +809,7 @@ export default function AdminApp() {
       <div className="a-bar">
         <span className="a-sp">{dirty ? "● Kaydedilmemiş değişiklik var" : "Tüm değişiklikler kaydedildi"}</span>
         <a className="a-btn" href="/" target="_blank">Siteyi Önizle</a>
-        <button className="a-btn a-g" onClick={save}>💾 Kaydet</button>
+        <button className="a-btn a-g" onClick={save}><Save size={16} /> Kaydet</button>
       </div>
 
       {toast && <div className={"a-toast a-on" + (toast.err ? " a-err" : "")}>{toast.msg}</div>}

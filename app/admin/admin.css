@@ -41,7 +41,8 @@ a{color:var(--orange)}
 .a-tab:hover{background:rgba(255,255,255,.08);color:#fff}
 .a-tab.a-on{background:var(--orange);color:#fff;font-weight:600}
 .a-side-foot{margin-top:auto;display:flex;flex-direction:column;gap:8px;font-size:12px;color:rgba(255,255,255,.45)}
-.a-side-foot a{color:rgba(255,255,255,.8);text-decoration:none;font-size:13px}
+.a-side-foot a{color:rgba(255,255,255,.8);text-decoration:none;font-size:13px;display:flex;align-items:center;gap:6px}
+.a-side-foot button{display:flex;align-items:center;gap:6px}
 
 .a-main{padding:26px 30px 90px;max-width:1500px}
 .a-page{display:none}.a-page.a-on{display:block}
@@ -85,7 +86,7 @@ a{color:var(--orange)}
 .a-row .a-t b{display:block;font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .a-row .a-t span{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
 .a-row .a-mv{display:flex;flex-direction:column;gap:2px}
-.a-row .a-mv button{border:0;background:transparent;cursor:pointer;color:var(--muted);line-height:1;padding:2px 4px;border-radius:4px}
+.a-row .a-mv button{border:0;background:transparent;cursor:pointer;color:var(--muted);line-height:1;padding:2px 4px;border-radius:4px;display:flex;align-items:center;justify-content:center}
 .a-row .a-mv button:hover{background:var(--orange);color:#fff}
 .a-tag{font-size:9.5px;font-weight:800;letter-spacing:.1em;background:var(--orange);color:#fff;padding:3px 7px;border-radius:99px}
 
@@ -119,6 +120,45 @@ a{color:var(--orange)}
 /* ---- drop zone ---- */
 .a-drop{border:2px dashed transparent;border-radius:12px;padding:4px;margin:-4px;transition:.2s}
 .a-drop-over{border-color:var(--orange);background:rgba(217,97,31,.08)}
+
+/* ---- image upload field ---- */
+.a-upload{
+  position:relative;height:130px;border-radius:12px;border:2px dashed var(--line);background:var(--cream);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;transition:.2s;margin-bottom:8px;
+}
+.a-upload:hover{border-color:var(--orange);background:rgba(217,97,31,.06)}
+.a-upload-over{border-color:var(--orange);background:rgba(217,97,31,.12)}
+.a-upload-busy{cursor:wait}
+.a-upload-preview{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.a-upload-overlay{
+  position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;
+  padding:10px 16px;font-size:12.5px;color:var(--muted);pointer-events:none;
+}
+.a-upload-preview ~ .a-upload-overlay{
+  color:#fff;background:rgba(20,12,6,.55);width:100%;height:100%;justify-content:center;opacity:0;transition:.2s;
+}
+.a-upload:hover .a-upload-preview ~ .a-upload-overlay,
+.a-upload-over .a-upload-preview ~ .a-upload-overlay,
+.a-upload-busy .a-upload-preview ~ .a-upload-overlay{opacity:1}
+.a-upload-icon{color:var(--orange)}
+.a-upload-preview ~ .a-upload-overlay .a-upload-icon{color:#fff}
+.a-upload-overlay b{color:var(--ink);font-weight:700}
+.a-upload-preview ~ .a-upload-overlay b{color:#fff}
+.a-spin{animation:a-spin 1s linear infinite}
+@keyframes a-spin{to{transform:rotate(360deg)}}
+.a-upload-url{
+  width:100%;padding:9px 12px;border:1px solid var(--line);border-radius:9px;background:#fff;font-size:12px;color:var(--muted);
+}
+.a-upload-url:focus{outline:0;border-color:var(--orange);color:var(--ink)}
+
+/* ---- stats ---- */
+.a-chart{display:flex;align-items:flex-end;gap:6px;height:160px;margin-top:16px}
+.a-chart-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:6px}
+.a-chart-bar{width:100%;max-width:26px;background:var(--orange);border-radius:5px 5px 2px 2px;transition:.2s;min-height:3px}
+.a-chart-col:hover .a-chart-bar{background:var(--orange-d)}
+.a-chart-label{font-size:9.5px;color:var(--muted);white-space:nowrap}
+.a-bar-track{height:8px;border-radius:99px;background:var(--cream-2);overflow:hidden}
+.a-bar-fill{height:100%;background:var(--orange);border-radius:99px}
 
 /* ---- toast ---- */
 .a-toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,20px);background:var(--ink);color:#fff;
