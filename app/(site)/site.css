@@ -232,14 +232,14 @@ p{margin:0 0 1rem}
 
 /* ---------- CARDS (flip) ---------- */
 .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(288px,1fr));gap:22px}
-.card{perspective:1600px;background:transparent;border:0;padding:0;opacity:0;transform:translateY(26px);}
+.card{-webkit-perspective:1600px;perspective:1600px;background:transparent;border:0;padding:0;opacity:0;transform:translateY(26px);}
 .card.in{opacity:1;transform:none;transition:opacity .7s ease,transform .7s cubic-bezier(.2,.8,.2,1)}
 .card-inner{
   position:relative;width:100%;aspect-ratio:3/4;
-  transform-style:preserve-3d;transition:transform .75s cubic-bezier(.4,.2,.2,1);
+  -webkit-transform-style:preserve-3d;transform-style:preserve-3d;transition:-webkit-transform .75s cubic-bezier(.4,.2,.2,1),transform .75s cubic-bezier(.4,.2,.2,1);
   border-radius:var(--radius);box-shadow:var(--shadow);
 }
-.card:hover .card-inner,.card.flipped .card-inner{transform:rotateY(180deg)}
+.card:hover .card-inner,.card.flipped .card-inner{-webkit-transform:rotateY(180deg);transform:rotateY(180deg)}
 .face{
   position:absolute;inset:0;border-radius:var(--radius);overflow:hidden;
   backface-visibility:hidden;-webkit-backface-visibility:hidden;
@@ -276,7 +276,7 @@ p{margin:0 0 1rem}
 .badge[data-b="NEW"]{background:#fff;color:var(--ink)}
 /* back */
 .face-back{
-  transform:rotateY(180deg);background:linear-gradient(165deg,#fff 0%,var(--cream) 100%);
+  -webkit-transform:rotateY(180deg);transform:rotateY(180deg);background:linear-gradient(165deg,#fff 0%,var(--cream) 100%);
   border:1px solid var(--line);
   display:flex;flex-direction:column;justify-content:space-between;padding:28px 24px;text-align:left;
 }
@@ -426,7 +426,7 @@ p{margin:0 0 1rem}
   .brand-img{height:36px}
   .lang-btn{padding:7px 9px;font-size:11px}
   .lang-menu{right:-8px;min-width:150px}
-  .hero{min-height:92svh}
+  .hero{min-height:100svh}
   .hero-content{padding-top:calc(var(--header-h) + 24px);padding-bottom:80px}
   .hero-tags{margin-top:34px}
   .chip{font-size:9.5px;padding:8px 13px}
@@ -443,8 +443,8 @@ p{margin:0 0 1rem}
   .footer{padding-bottom:84px}
 }
 @media(hover:none){
-  .card:hover .card-inner{transform:none}
-  .card.flipped .card-inner{transform:rotateY(180deg)}
+  .card:hover .card-inner{-webkit-transform:none;transform:none}
+  .card.flipped .card-inner{-webkit-transform:rotateY(180deg);transform:rotateY(180deg)}
 }
 @media(prefers-reduced-motion:reduce){
   *{animation-duration:.01ms !important;transition-duration:.01ms !important}
