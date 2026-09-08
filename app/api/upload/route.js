@@ -24,6 +24,7 @@ export async function POST(req) {
 
   const buf = await sharp(original)
     .rotate()
+    .trim()
     .resize({ width: MAX_WIDTH, withoutEnlargement: true })
     .webp({ quality: 80 })
     .toBuffer();
