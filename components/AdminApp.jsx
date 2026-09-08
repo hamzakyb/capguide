@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import ImageUploadField from "./ImageUploadField";
+import DonutChart from "./DonutChart";
 import {
   Compass,
   Star,
@@ -18,7 +19,11 @@ import {
   Plus,
   Upload,
   Download,
-  Wand2
+  Wand2,
+  Globe,
+  MapPin,
+  Smartphone,
+  Link2
 } from "lucide-react";
 
 const CAT_OPTIONS = [
@@ -41,6 +46,32 @@ const BADGES = ["", "BEST SELLER", "POPULAR", "LIMITED", "SUPER PRICE", "NEW", "
 const emptyTour = () => ({
   cat: "tours", badge: "", name: "Yeni Tur", desc: "", time: "", price: "", img: "", wa: ""
 });
+
+function StatList({ items, iconMap }) {
+  if (!items || items.length === 0) return <p className="a-hint">Henüz veri yok.</p>;
+  const max = Math.max(...items.map((i) => i.count));
+  return (
+    <div style={{ display: "grid", gap: 10 }}>
+      {items.map((it) => {
+        const Icon = iconMap?.[it.name];
+        return (
+          <div key={it.name}>
+            <div style={{ display: "flex", justifyContent: "space-between", gap: 12, fontSize: 13, marginBottom: 4 }}>
+              <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                {Icon ? <Icon size={14} /> : null}
+                {it.name}
+              </span>
+              <b>{it.count}</b>
+            </div>
+            <div className="a-bar-track">
+              <div className="a-bar-fill" style={{ width: Math.max(4, Math.round((it.count / max) * 100)) + "%" }} />
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
 
 export default function AdminApp() {
   const [authed, setAuthed] = useState(false);
@@ -749,6 +780,40 @@ export default function AdminApp() {
                     );
                   })()}
                 </div>
+
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(320px,1fr))", gap: 16, marginTop: 20 }}>
+                  <div className="a-card">
+                    <h3 style={{ marginTop: 0, display: "flex", alignItems: "center", gap: 8 }}>
+                      <Smartphone size={17} /> Cihaz Dağılımı (son 30 gün)
+                    </h3>
+                    <DonutChart items={stats.deviceBreakdown} />
+                  </div>
+
+                  <div className="a-card">
+                    <h3 style={{ marginTop: 0, display: "flex", alignItems: "center", gap: 8 }}>
+                      <Globe size={17} /> Ülkeler (son 30 gün)
+                    </h3>
+                    <DonutChart items={stats.topCountries} />
+                  </div>
+
+                  <div className="a-card">
+                    <h3 style={{ marginTop: 0, display: "flex", alignItems: "center", gap: 8 }}>
+                      <Link2 size={17} /> Yönlendiren Siteler (son 30 gün)
+                    </h3>
+                    <DonutChart items={stats.topReferrers} />
+                  </div>
+
+                  <div className="a-card">
+                    <h3 style={{ marginTop: 0, display: "flex", alignItems: "center", gap: 8 }}>
+                      <MapPin size={17} /> Şehirler (son 30 gün)
+                    </h3>
+                    <StatList items={stats.topCities} />
+                  </div>
+                </div>
+
+                <p className="a-hint" style={{ marginTop: 16 }}>
+                  Ülke/şehir bilgisi yalnızca site Vercel üzerinde yayındayken toplanır; yerel geliştirme ortamında &quot;Bilinmiyor&quot; görünür.
+                </p>
               </>
             ) : (
               <p className="a-hint">Veri yok.</p>

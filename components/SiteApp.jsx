@@ -78,7 +78,7 @@ export default function SiteApp({ content }) {
     fetch("/api/track", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ type: "pageview" })
+      body: JSON.stringify({ type: "pageview", referrer: document.referrer })
     }).catch(() => {});
   }, []);
 

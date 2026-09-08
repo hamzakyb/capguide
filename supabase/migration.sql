@@ -27,3 +27,8 @@ create table if not exists public.analytics_events (
 
 create index if not exists analytics_events_type_created_idx
   on public.analytics_events (type, created_at);
+
+alter table public.analytics_events add column if not exists country text;
+alter table public.analytics_events add column if not exists city text;
+alter table public.analytics_events add column if not exists device text;
+alter table public.analytics_events add column if not exists referrer text;
