@@ -3,25 +3,19 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import WhatsAppIcon from "./WhatsAppIcon";
 import BrandLogo from "./BrandLogo";
-import { waLink, CAT_LABEL, CAT_HUE } from "@/lib/wa";
+import { waLink, CAT_HUE } from "@/lib/wa";
+import { LANGS, DEFAULT_LANG, RTL_LANGS, CAT_LABEL, FILTER_LABEL, BADGE_LABEL, WA_TEMPLATE, t } from "@/lib/i18n";
 
-const NAV = [
-  { label: "Home", href: "#home" },
-  { label: "Tours", href: "#tours", filter: "tours" },
-  { label: "Activities", href: "#tours", filter: "activities" },
-  { label: "Experiences", href: "#tours", filter: "experiences" },
-  { label: "Workshops", href: "#tours", filter: "workshops" },
-  { label: "Contact", href: "#contact" }
+const NAV_KEYS = [
+  { key: "navHome", href: "#home" },
+  { key: "navTours", href: "#tours", filter: "tours" },
+  { key: "navActivities", href: "#tours", filter: "activities" },
+  { key: "navExperiences", href: "#tours", filter: "experiences" },
+  { key: "navWorkshops", href: "#tours", filter: "workshops" },
+  { key: "navContact", href: "#contact" }
 ];
 
-const FILTERS = [
-  { cat: "all", label: "All" },
-  { cat: "tours", label: "Tours" },
-  { cat: "activities", label: "Adventures" },
-  { cat: "transfer", label: "Transfer & Rental" },
-  { cat: "experiences", label: "Experiences" },
-  { cat: "workshops", label: "Workshops" }
-];
+const FILTER_CATS = ["all", "tours", "activities", "transfer", "experiences", "workshops"];
 
 function useReveal(deps) {
   const ref = useRef(null);
@@ -52,15 +46,37 @@ function useReveal(deps) {
 
 export default function SiteApp({ content }) {
   const { settings, tours, featured } = content;
+
+  const [lang, setLang] = useState(DEFAULT_LANG);
+  const [langMenuOpen, setLangMenuOpen] = useState(false);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("capguide_lang");
+      if (saved && LANGS.some((l) => l.code === saved)) setLang(saved);
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("capguide_lang", lang);
+    } catch {}
+    document.documentElement.lang = lang;
+    document.documentElement.dir = RTL_LANGS.has(lang) ? "rtl" : "ltr";
+  }, [lang]);
+
+  const s = settings.i18n[lang] || settings.i18n[DEFAULT_LANG];
+  const currentLangInfo = LANGS.find((l) => l.code === lang);
+
   const num = (settings.whatsapp || "").replace(/\D/g, "");
-  const defaultMsg = settings.defaultMsg;
+  const defaultMsg = s.defaultMsg;
   const wa = (msg) => waLink(num, msg || defaultMsg);
 
-  function trackClick(tourName) {
+  function trackClick(tourEnName) {
     fetch("/api/track", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ type: "tour_click", tourName })
+      body: JSON.stringify({ type: "tour_click", tourName: tourEnName })
     }).catch(() => {});
   }
 
@@ -72,7 +88,7 @@ export default function SiteApp({ content }) {
     () => typeof window !== "undefined" && window.matchMedia("(hover:none)").matches
   );
 
-  const rootRef = useReveal([tours.length, filter]);
+  const rootRef = useReveal([tours.length, filter, lang]);
 
   useEffect(() => {
     fetch("/api/track", {
@@ -105,7 +121,7 @@ export default function SiteApp({ content }) {
   }, []);
 
   const filteredTours = useMemo(
-    () => (filter === "all" ? tours : tours.filter((t) => t.cat === filter)),
+    () => (filter === "all" ? tours : tours.filter((tr) => tr.cat === filter)),
     [tours, filter]
   );
 
@@ -118,19 +134,33 @@ export default function SiteApp({ content }) {
 
   const prettyNum = num.replace(/^(\d{2})(\d{3})(\d{3})(\d{2})(\d{2})$/, "$1 $2 $3 $4 $5");
 
+  function tourText(tour) {
+    return tour.i18n[lang] || tour.i18n[DEFAULT_LANG];
+  }
+  function featText(f) {
+    return f.i18n[lang] || f.i18n[DEFAULT_LANG];
+  }
+  function waForTour(tour) {
+    const txt = tourText(tour);
+    return txt.wa || WA_TEMPLATE[lang]?.(txt.name) || WA_TEMPLATE.en(txt.name);
+  }
+
+  const chipTourIds = ["red-tour", "balloon-tour", "classic-car-tour"];
+  const chipTours = chipTourIds.map((id) => tours.find((tr) => tr.id === id)).filter(Boolean);
+
   return (
     <div ref={rootRef}>
       {/* ============ HEADER ============ */}
       <header className={"site-header" + (scrolled ? " scrolled" : "")} id="header">
         <div className="wrap header-inner">
           <a href="#home" className="brand" aria-label="Capguide Travel">
-<BrandLogo src={settings.logoImg} />
+            <BrandLogo src={settings.logoImg} />
           </a>
 
           <nav className={"nav" + (menuOpen ? " open" : "")} id="nav">
-            {NAV.map((n) => (
+            {NAV_KEYS.map((n) => (
               <a
-                key={n.label}
+                key={n.key}
                 href={n.href}
                 className={activeSection === n.href.slice(1) ? "active" : ""}
                 onClick={(e) => {
@@ -142,17 +172,47 @@ export default function SiteApp({ content }) {
                   }
                 }}
               >
-                {n.label}
+                {t(lang, n.key)}
               </a>
             ))}
             <a className="mob-wa" href={wa()} target="_blank" rel="noopener noreferrer">
-              Chat on WhatsApp
+              {t(lang, "navChatWa")}
             </a>
           </nav>
 
+          <div className="lang-switch">
+            <button
+              type="button"
+              className="lang-btn"
+              onClick={() => setLangMenuOpen((v) => !v)}
+              aria-expanded={langMenuOpen}
+            >
+              <span>{currentLangInfo?.flag}</span>
+              <span className="lang-code">{lang.toUpperCase()}</span>
+            </button>
+            {langMenuOpen ? (
+              <div className="lang-menu">
+                {LANGS.map((l) => (
+                  <button
+                    key={l.code}
+                    type="button"
+                    className={"lang-opt" + (l.code === lang ? " is-active" : "")}
+                    onClick={() => {
+                      setLang(l.code);
+                      setLangMenuOpen(false);
+                    }}
+                  >
+                    <span>{l.flag}</span>
+                    <span>{l.label}</span>
+                  </button>
+                ))}
+              </div>
+            ) : null}
+          </div>
+
           <a className="btn btn-wa header-cta" href={wa()} target="_blank" rel="noopener noreferrer">
             <WhatsAppIcon className="ico-wa" />
-            WhatsApp
+            {t(lang, "headerWa")}
           </a>
 
           <button
@@ -177,14 +237,14 @@ export default function SiteApp({ content }) {
         <div className="hero-shade"></div>
 
         <div className="wrap hero-content">
-          <span className="eyebrow reveal">CAPGUIDE TRAVEL · CAPPADOCIA</span>
+          <span className="eyebrow reveal">{t(lang, "heroEyebrow")}</span>
           <h1 className="hero-title reveal">
-            {settings.heroTitleTop}
+            {s.heroTitleTop}
             <br />
-            <em>{settings.heroTitleBottom}</em>
+            <em>{s.heroTitleBottom}</em>
           </h1>
           <p className="hero-sub reveal">
-            {settings.heroSub.split("•").map((part, i, arr) => (
+            {s.heroSub.split("•").map((part, i, arr) => (
               <span key={i}>
                 {part}
                 {i < arr.length - 1 ? <span>•</span> : null}
@@ -193,23 +253,23 @@ export default function SiteApp({ content }) {
           </p>
           <div className="hero-actions reveal">
             <a className="btn btn-primary btn-lg" href={wa()} target="_blank" rel="noopener noreferrer">
-              PLAN YOUR EXPERIENCE
+              {t(lang, "heroPlan")}
             </a>
             <a className="btn btn-ghost btn-lg" href="#tours">
-              EXPLORE TOURS
+              {t(lang, "heroExplore")}
             </a>
           </div>
 
           <div className="hero-tags reveal">
-            <span className="chip">
-              <i className="dot"></i>BEST SELLER <b>Cappadocia Red Tour</b>
-            </span>
-            <span className="chip">
-              <i className="dot"></i>POPULAR <b>Hot Air Balloon</b>
-            </span>
-            <span className="chip">
-              <i className="dot"></i>LIMITED <b>Classic Car Tour</b>
-            </span>
+            {chipTours.map((tour) => {
+              const txt = tourText(tour);
+              return (
+                <span className="chip" key={tour.id}>
+                  <i className="dot"></i>
+                  {tour.badge ? (BADGE_LABEL[lang]?.[tour.badge] || tour.badge) : ""} <b>{txt.name}</b>
+                </span>
+              );
+            })}
           </div>
         </div>
 
@@ -225,29 +285,29 @@ export default function SiteApp({ content }) {
             <svg viewBox="0 0 24 24" className="ti">
               <path d="M12 2 3 7v6c0 5 3.8 8.4 9 9 5.2-.6 9-4 9-9V7l-9-5Z" />
             </svg>
-            <h3>LOCAL EXPERIENCE</h3>
-            <p>Authentic Cappadocia experiences</p>
+            <h3>{t(lang, "trust1Title")}</h3>
+            <p>{t(lang, "trust1Desc")}</p>
           </div>
           <div className="trust-item reveal">
             <svg viewBox="0 0 24 24" className="ti">
               <path d="m12 2 2.9 6.2 6.6.8-4.9 4.6 1.3 6.7L12 17l-5.9 3.3 1.3-6.7L2.5 9l6.6-.8L12 2Z" />
             </svg>
-            <h3>BEST EXPERIENCES</h3>
-            <p>Tours &amp; activities for every traveler</p>
+            <h3>{t(lang, "trust2Title")}</h3>
+            <p>{t(lang, "trust2Desc")}</p>
           </div>
           <div className="trust-item reveal">
             <svg viewBox="0 0 24 24" className="ti">
               <path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0 2c-5 0-9 2.6-9 5.8V22h18v-2.2c0-3.2-4-5.8-9-5.8Z" />
             </svg>
-            <h3>PRIVATE OPTIONS</h3>
-            <p>Flexible private experiences</p>
+            <h3>{t(lang, "trust3Title")}</h3>
+            <p>{t(lang, "trust3Desc")}</p>
           </div>
           <div className="trust-item reveal">
             <svg viewBox="0 0 24 24" className="ti">
               <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.46 1.32 4.96L2 22l5.25-1.38a9.9 9.9 0 0 0 4.79 1.22c5.46 0 9.91-4.45 9.91-9.91S17.5 2 12.04 2Z" />
             </svg>
-            <h3>WHATSAPP SUPPORT</h3>
-            <p>Quick &amp; easy communication</p>
+            <h3>{t(lang, "trust4Title")}</h3>
+            <p>{t(lang, "trust4Desc")}</p>
           </div>
         </div>
       </section>
@@ -256,35 +316,33 @@ export default function SiteApp({ content }) {
       <section className="section tours-section" id="tours">
         <div className="wrap">
           <div className="section-head reveal">
-            <span className="eyebrow dark">OUR SERVICES</span>
+            <span className="eyebrow dark">{t(lang, "toursEyebrow")}</span>
             <h2 className="section-title">
-              EXPLORE <em>CAPPADOCIA</em>
+              {t(lang, "toursTitleTop")} <em>{t(lang, "toursTitleEm")}</em>
             </h2>
-            <p className="section-sub">
-              Discover the most unforgettable tours, adventures and experiences in Cappadocia.
-            </p>
+            <p className="section-sub">{t(lang, "toursSub")}</p>
           </div>
 
           <div className="filters reveal">
-            {FILTERS.map((f) => (
+            {FILTER_CATS.map((cat) => (
               <button
-                key={f.cat}
-                className={"filter" + (filter === f.cat ? " is-active" : "")}
-                onClick={() => setFilter(f.cat)}
+                key={cat}
+                className={"filter" + (filter === cat ? " is-active" : "")}
+                onClick={() => setFilter(cat)}
               >
-                {f.label}
+                {FILTER_LABEL[lang]?.[cat] || cat}
               </button>
             ))}
           </div>
 
           <div className="cards">
-            {filteredTours.map((t) => {
-              const id = t.name;
+            {filteredTours.map((tour) => {
+              const txt = tourText(tour);
               return (
                 <article
                   className="card"
-                  key={id}
-                  data-cat={t.cat}
+                  key={tour.id}
+                  data-cat={tour.cat}
                   onClick={(e) => {
                     if (!isTouch) return;
                     if (e.target.closest("a")) return;
@@ -298,57 +356,52 @@ export default function SiteApp({ content }) {
                 >
                   <div className="card-inner">
                     <div className="face face-front">
-                      <div className="ph" style={{ "--h": CAT_HUE[t.cat] || 24 }}>
+                      <div className="ph" style={{ "--h": CAT_HUE[tour.cat] || 24 }}>
                         <div className="ph-fallback"></div>
                         <img
-                          src={t.img}
-                          alt={t.name}
+                          src={tour.img}
+                          alt={txt.name}
                           loading="lazy"
                           onError={(e) => (e.currentTarget.style.display = "none")}
                         />
                       </div>
                       <div className="grad"></div>
-                      {t.badge ? (
-                        <span className="badge" data-b={t.badge}>
-                          {t.badge}
+                      {tour.badge ? (
+                        <span className="badge" data-b={tour.badge}>
+                          {BADGE_LABEL[lang]?.[tour.badge] || tour.badge}
                         </span>
                       ) : null}
                       <div className="card-front-body">
-                        <h3
-                          className="card-name"
-                          dangerouslySetInnerHTML={{
-                            __html: t.name.replace(/^Cappadocia /, "CAPPADOCIA<br>")
-                          }}
-                        />
+                        <h3 className="card-name">{txt.name}</h3>
                         <div className="card-meta">
-                          {t.time ? <span>{t.time}</span> : null}
-                          {t.price ? <span>{t.price}</span> : null}
+                          {tour.time ? <span>{tour.time}</span> : null}
+                          {tour.price ? <span>{tour.price}</span> : null}
                         </div>
                       </div>
                     </div>
                     <div className="face face-back">
                       <div>
-                        <span className="back-cat">{CAT_LABEL[t.cat] || ""}</span>
-                        <h3 className="back-name">{t.name}</h3>
-                        <p className="back-desc">{t.desc}</p>
+                        <span className="back-cat">{CAT_LABEL[lang]?.[tour.cat] || ""}</span>
+                        <h3 className="back-name">{txt.name}</h3>
+                        <p className="back-desc">{txt.desc}</p>
                         <div className="back-info">
-                          {t.time ? <span className="pill">{t.time}</span> : null}
-                          {t.price ? <span className="pill">{t.price}</span> : null}
-                          {t.badge ? <span className="pill">{t.badge}</span> : null}
+                          {tour.time ? <span className="pill">{tour.time}</span> : null}
+                          {tour.price ? <span className="pill">{tour.price}</span> : null}
+                          {tour.badge ? <span className="pill">{BADGE_LABEL[lang]?.[tour.badge] || tour.badge}</span> : null}
                         </div>
                       </div>
                       <a
                         className="back-btn"
-                        href={wa(t.wa)}
+                        href={wa(waForTour(tour))}
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={(e) => {
                           e.stopPropagation();
-                          trackClick(t.name);
+                          trackClick(tour.i18n.en.name);
                         }}
                       >
                         <WhatsAppIcon width={16} height={16} />
-                        Ask on WhatsApp
+                        {t(lang, "askWa")}
                       </a>
                     </div>
                   </div>
@@ -356,7 +409,7 @@ export default function SiteApp({ content }) {
               );
             })}
           </div>
-          <p className="flip-hint">Hover over a card to see the details — on mobile, just tap.</p>
+          <p className="flip-hint">{t(lang, "flipHint")}</p>
         </div>
       </section>
 
@@ -364,35 +417,37 @@ export default function SiteApp({ content }) {
       <section className="section featured-section" id="featured">
         <div className="wrap">
           <div className="section-head reveal">
-            <span className="eyebrow">HIGHLIGHTS</span>
+            <span className="eyebrow">{t(lang, "featuredEyebrow")}</span>
             <h2 className="section-title light">
-              UNFORGETTABLE <em>MOMENTS</em>
+              {t(lang, "featuredTitleTop")} <em>{t(lang, "featuredTitleEm")}</em>
             </h2>
           </div>
           <div className="featured-grid">
-            {featured.map((f) => {
-              const t = tours.find((x) => x.name === f.name);
+            {featured.map((f, i) => {
+              const ftxt = featText(f);
+              const tour = tours.find((tr) => tr.id === f.tourId);
+              const waMsg = tour ? waForTour(tour) : WA_TEMPLATE[lang]?.(ftxt.title) || WA_TEMPLATE.en(ftxt.title);
               return (
                 <a
                   className="feat"
-                  key={f.title}
-                  href={wa(t ? t.wa : "Hello, I would like to get information about " + f.title + ".")}
+                  key={f.tourId || i}
+                  href={wa(waMsg)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  onClick={() => trackClick(f.name)}
+                  onClick={() => trackClick(tour ? tour.i18n.en.name : ftxt.title)}
                 >
                   <div className="ph-fallback"></div>
                   <img
                     src={f.img}
-                    alt={f.title}
+                    alt={ftxt.title}
                     loading="lazy"
                     onError={(e) => (e.currentTarget.style.display = "none")}
                   />
                   <div className="feat-shade"></div>
                   <div className="feat-body">
-                    <h3 className="feat-title">{f.title}</h3>
-                    <p className="feat-sub">{f.sub}</p>
-                    <span className="feat-cta">Ask on WhatsApp →</span>
+                    <h3 className="feat-title">{ftxt.title}</h3>
+                    <p className="feat-sub">{ftxt.sub}</p>
+                    <span className="feat-cta">{t(lang, "featuredCta")}</span>
                   </div>
                 </a>
               );
@@ -409,22 +464,18 @@ export default function SiteApp({ content }) {
             <div className="about-fallback" aria-hidden="true"></div>
           </div>
           <div className="about-text reveal">
-            <span className="eyebrow dark">CAPGUIDE TRAVEL</span>
+            <span className="eyebrow dark">{t(lang, "aboutEyebrow")}</span>
             <h2 className="section-title">
-              DISCOVER.
+              {t(lang, "aboutTitle1")}
               <br />
-              EXPERIENCE.
+              {t(lang, "aboutTitle2")}
               <br />
-              <em>REMEMBER.</em>
+              <em>{t(lang, "aboutTitleEm")}</em>
             </h2>
-            <p>
-              Cappadocia is not a place you simply visit — it is a place you feel. We design days that go beyond
-              sightseeing: sunrise above the valleys, dust on the trails, warm stone under your hand in an Avanos
-              workshop.
-            </p>
-            <p>Tell us what you dream of, and we will shape the rest.</p>
+            <p>{t(lang, "aboutP1")}</p>
+            <p>{t(lang, "aboutP2")}</p>
             <a className="btn btn-primary" href={wa()} target="_blank" rel="noopener noreferrer">
-              TALK TO US ON WHATSAPP
+              {t(lang, "aboutCta")}
             </a>
           </div>
         </div>
@@ -433,31 +484,28 @@ export default function SiteApp({ content }) {
       {/* ============ CONTACT ============ */}
       <section className="section contact" id="contact">
         <div className="wrap contact-inner reveal">
-          <span className="eyebrow">CONTACT</span>
+          <span className="eyebrow">{t(lang, "contactEyebrow")}</span>
           <h2 className="contact-title">
-            LET&apos;S PLAN YOUR
+            {t(lang, "contactTitle1")}
             <br />
-            <em>CAPPADOCIA EXPERIENCE</em>
+            <em>{t(lang, "contactTitleEm")}</em>
           </h2>
-          <p className="contact-sub">
-            Have a question or looking for the perfect Cappadocia experience? Contact us on WhatsApp and we&apos;ll
-            help you plan your trip.
-          </p>
+          <p className="contact-sub">{t(lang, "contactSub")}</p>
 
           <div className="contact-cards">
             <a className="contact-card" href={wa()} target="_blank" rel="noopener noreferrer">
-              <span className="cc-label">WHATSAPP</span>
+              <span className="cc-label">{t(lang, "contactWaLabel")}</span>
               <span className="cc-value">+{prettyNum}</span>
             </a>
             <a className="contact-card" href={`mailto:${settings.email}`}>
-              <span className="cc-label">EMAIL</span>
+              <span className="cc-label">{t(lang, "contactEmailLabel")}</span>
               <span className="cc-value">{settings.email}</span>
             </a>
           </div>
 
           <a className="btn btn-primary btn-xl" href={wa()} target="_blank" rel="noopener noreferrer">
             <WhatsAppIcon className="ico-wa" />
-            CHAT ON WHATSAPP
+            {t(lang, "contactCta")}
           </a>
         </div>
       </section>
@@ -466,12 +514,12 @@ export default function SiteApp({ content }) {
       <footer className="footer">
         <div className="wrap footer-inner">
           <a href="#home" className="brand footer-brand">
-<BrandLogo src={settings.logoImg} />
+            <BrandLogo src={settings.logoImg} />
           </a>
           <nav className="footer-nav">
-            {NAV.map((n) => (
+            {NAV_KEYS.map((n) => (
               <a
-                key={n.label}
+                key={n.key}
                 href={n.href}
                 onClick={(e) => {
                   if (n.filter) {
@@ -480,14 +528,14 @@ export default function SiteApp({ content }) {
                   }
                 }}
               >
-                {n.label}
+                {t(lang, n.key)}
               </a>
             ))}
           </nav>
           <p className="copy">
-            © {new Date().getFullYear()} Capguide Travel. All Rights Reserved.
+            © {new Date().getFullYear()} Capguide Travel. {t(lang, "footerRights")}.
             <br />
-            <span className="credit">Photos: Wikimedia Commons &amp; Flickr contributors (CC BY / CC BY-SA)</span>
+            <span className="credit">{t(lang, "footerCredit")}</span>
           </p>
         </div>
       </footer>
@@ -495,7 +543,7 @@ export default function SiteApp({ content }) {
       {/* ============ SABİT WHATSAPP BUTONU ============ */}
       <a className="wa-float" href={wa()} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
         <WhatsAppIcon width={32} height={32} />
-        <span className="wa-float-label">Chat with us</span>
+        <span className="wa-float-label">{t(lang, "waFloatLabel")}</span>
       </a>
     </div>
   );

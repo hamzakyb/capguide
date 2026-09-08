@@ -117,6 +117,15 @@ a{color:var(--orange)}
 .a-code{background:var(--ink);color:#F0E6D2;padding:12px 14px;border-radius:10px;font-family:ui-monospace,Menlo,monospace;
   font-size:12.5px;margin-top:10px;overflow-x:auto;white-space:pre}
 
+/* ---- language tabs ---- */
+.a-langtabs{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0}
+.a-langtab{
+  border:1px solid var(--line);background:#fff;color:var(--ink-2);padding:7px 12px;border-radius:9px;
+  cursor:pointer;font-size:12.5px;font-weight:600;transition:.2s;
+}
+.a-langtab:hover{border-color:var(--orange)}
+.a-langtab.a-on{background:var(--orange);border-color:var(--orange);color:#fff}
+
 /* ---- drop zone ---- */
 .a-drop{border:2px dashed transparent;border-radius:12px;padding:4px;margin:-4px;transition:.2s}
 .a-drop-over{border-color:var(--orange);background:rgba(217,97,31,.08)}

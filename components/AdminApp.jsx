@@ -25,6 +25,7 @@ import {
   Smartphone,
   Link2
 } from "lucide-react";
+import { LANGS, DEFAULT_LANG, CAT_LABEL as CAT_LABEL_I18N, WA_TEMPLATE } from "@/lib/i18n";
 
 const CAT_OPTIONS = [
   { v: "tours", l: "Turlar" },
@@ -34,18 +35,43 @@ const CAT_OPTIONS = [
   { v: "workshops", l: "Atölyeler" }
 ];
 const CAT_LABEL = Object.fromEntries(CAT_OPTIONS.map((c) => [c.v, c.l]));
-const CAT_LABEL_EN = {
-  tours: "Cappadocia Tour",
-  activities: "Adventure & Activity",
-  transfer: "Transfer & Rental",
-  experiences: "Experience",
-  workshops: "Workshop"
-};
 const BADGES = ["", "BEST SELLER", "POPULAR", "LIMITED", "SUPER PRICE", "NEW", "PRIVATE"];
 
+function emptyI18n(seed) {
+  return Object.fromEntries(LANGS.map((l) => [l.code, { ...seed }]));
+}
+
+function makeId() {
+  return "tour-" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+}
+
 const emptyTour = () => ({
-  cat: "tours", badge: "", name: "Yeni Tur", desc: "", time: "", price: "", img: "", wa: ""
+  id: makeId(),
+  cat: "tours",
+  badge: "",
+  price: "",
+  time: "",
+  img: "",
+  i18n: emptyI18n({ name: "Yeni Tur", desc: "", wa: "" })
 });
+
+function LangTabs({ lang, setLang }) {
+  return (
+    <div className="a-langtabs">
+      {LANGS.map((l) => (
+        <button
+          key={l.code}
+          type="button"
+          className={"a-langtab" + (l.code === lang ? " a-on" : "")}
+          onClick={() => setLang(l.code)}
+          title={l.label}
+        >
+          {l.flag} {l.code.toUpperCase()}
+        </button>
+      ))}
+    </div>
+  );
+}
 
 function StatList({ items, iconMap }) {
   if (!items || items.length === 0) return <p className="a-hint">Henüz veri yok.</p>;
@@ -90,6 +116,8 @@ export default function AdminApp() {
   const [stats, setStats] = useState(null);
   const [statsLoading, setStatsLoading] = useState(false);
   const [statsRange, setStatsRange] = useState("30d");
+
+  const [editLang, setEditLang] = useState(DEFAULT_LANG);
 
   const [curPass, setCurPass] = useState("");
   const [newPass, setNewPass] = useState("");
@@ -231,11 +259,23 @@ export default function AdminApp() {
   }
 
   const tour = data.tours[idx] || null;
+  const tourText = tour ? (tour.i18n[editLang] || tour.i18n[DEFAULT_LANG]) : { name: "", desc: "", wa: "" };
+  const settingsText = data.settings.i18n[editLang] || data.settings.i18n[DEFAULT_LANG];
 
   function updateTour(patch) {
     setData((d) => {
       const tours = d.tours.slice();
       tours[idx] = { ...tours[idx], ...patch };
+      return { ...d, tours };
+    });
+    mark();
+  }
+
+  function updateTourText(patch) {
+    setData((d) => {
+      const tours = d.tours.slice();
+      const cur = tours[idx];
+      tours[idx] = { ...cur, i18n: { ...cur.i18n, [editLang]: { ...cur.i18n[editLang], ...patch } } };
       return { ...d, tours };
     });
     mark();
@@ -266,7 +306,9 @@ export default function AdminApp() {
     if (!tour) return;
     setData((d) => {
       const tours = d.tours.slice();
-      tours.splice(idx + 1, 0, { ...tour, name: tour.name + " (kopya)" });
+      const i18n = {};
+      for (const l of LANGS) i18n[l.code] = { ...tour.i18n[l.code], name: tour.i18n[l.code].name + " (kopya)" };
+      tours.splice(idx + 1, 0, { ...tour, id: makeId(), i18n });
       return { ...d, tours };
     });
     setIdx((i) => i + 1);
@@ -275,7 +317,7 @@ export default function AdminApp() {
 
   function delTour() {
     if (!tour) return;
-    if (!confirm(`"${tour.name}" silinsin mi?`)) return;
+    if (!confirm(`"${tourText.name}" silinsin mi?`)) return;
     setData((d) => {
       const tours = d.tours.slice();
       tours.splice(idx, 1);
@@ -287,7 +329,8 @@ export default function AdminApp() {
 
   function genWa() {
     if (!tour) return;
-    updateTour({ wa: "Hello, I would like to get information about " + (tour.name || "your tours") + "." });
+    const fn = WA_TEMPLATE[editLang] || WA_TEMPLATE[DEFAULT_LANG];
+    updateTourText({ wa: fn(tourText.name || "your tours") });
   }
 
   async function changePassword(e) {
@@ -333,8 +376,26 @@ export default function AdminApp() {
     mark();
   }
 
+  function updateFeaturedText(i, patch) {
+    setData((d) => {
+      const featured = d.featured.slice();
+      const cur = featured[i];
+      featured[i] = { ...cur, i18n: { ...cur.i18n, [editLang]: { ...cur.i18n[editLang], ...patch } } };
+      return { ...d, featured };
+    });
+    mark();
+  }
+
   function updateSettings(patch) {
     setData((d) => ({ ...d, settings: { ...d.settings, ...patch } }));
+    mark();
+  }
+
+  function updateSettingsText(patch) {
+    setData((d) => ({
+      ...d,
+      settings: { ...d.settings, i18n: { ...d.settings.i18n, [editLang]: { ...d.settings.i18n[editLang], ...patch } } }
+    }));
     mark();
   }
 
@@ -424,24 +485,29 @@ export default function AdminApp() {
               </div>
             </div>
 
+            <LangTabs lang={editLang} setLang={setEditLang} />
+
             <div className="a-grid2">
               <div>
                 <div className="a-list">
-                  {data.tours.map((t, i) => (
-                    <div key={i} className={"a-row" + (i === idx ? " a-on" : "")} onClick={() => setIdx(i)}>
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img className="a-thumb" src={t.img || ""} alt="" onError={(e) => (e.currentTarget.style.opacity = 0.15)} />
-                      <div className="a-t">
-                        <b>{t.name || "(isimsiz)"}</b>
-                        <span>{CAT_LABEL[t.cat] || t.cat}</span>
+                  {data.tours.map((t, i) => {
+                    const tt = t.i18n[editLang] || t.i18n[DEFAULT_LANG];
+                    return (
+                      <div key={t.id} className={"a-row" + (i === idx ? " a-on" : "")} onClick={() => setIdx(i)}>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img className="a-thumb" src={t.img || ""} alt="" onError={(e) => (e.currentTarget.style.opacity = 0.15)} />
+                        <div className="a-t">
+                          <b>{tt.name || "(isimsiz)"}</b>
+                          <span>{CAT_LABEL[t.cat] || t.cat}</span>
+                        </div>
+                        {t.badge ? <span className="a-tag">{t.badge}</span> : null}
+                        <div className="a-mv">
+                          <button onClick={(e) => { e.stopPropagation(); move(i, i - 1); }} title="Yukarı"><ChevronUp size={15} /></button>
+                          <button onClick={(e) => { e.stopPropagation(); move(i, i + 1); }} title="Aşağı"><ChevronDown size={15} /></button>
+                        </div>
                       </div>
-                      {t.badge ? <span className="a-tag">{t.badge}</span> : null}
-                      <div className="a-mv">
-                        <button onClick={(e) => { e.stopPropagation(); move(i, i - 1); }} title="Yukarı"><ChevronUp size={15} /></button>
-                        <button onClick={(e) => { e.stopPropagation(); move(i, i + 1); }} title="Aşağı"><ChevronDown size={15} /></button>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
                 <p className="a-hint" style={{ marginTop: 10 }}>
                   Toplam <b>{data.tours.length}</b> hizmet · ▲▼ ile sırayı değiştirin
@@ -453,8 +519,8 @@ export default function AdminApp() {
                   <div className="a-card">
                     <div className="a-grid-form">
                       <div className="a-field a-full">
-                        <label>Tur / Aktivite Adı</label>
-                        <input value={tour.name} onChange={(e) => updateTour({ name: e.target.value })} placeholder="Cappadocia Red Tour" />
+                        <label>Tur / Aktivite Adı ({editLang.toUpperCase()})</label>
+                        <input value={tourText.name} onChange={(e) => updateTourText({ name: e.target.value })} placeholder="Cappadocia Red Tour" />
                       </div>
                       <div className="a-field">
                         <label>Kategori</label>
@@ -481,8 +547,8 @@ export default function AdminApp() {
                         <input value={tour.price} onChange={(e) => updateTour({ price: e.target.value })} placeholder="€45" />
                       </div>
                       <div className="a-field a-full">
-                        <label>Kısa Açıklama (kartın arkası)</label>
-                        <textarea value={tour.desc} onChange={(e) => updateTour({ desc: e.target.value })} placeholder="Discover Cappadocia's iconic valleys..." />
+                        <label>Kısa Açıklama ({editLang.toUpperCase()}, kartın arkası)</label>
+                        <textarea value={tourText.desc} onChange={(e) => updateTourText({ desc: e.target.value })} placeholder="Discover Cappadocia's iconic valleys..." />
                       </div>
                       <ImageUploadField
                         label="Fotoğraf"
@@ -490,12 +556,12 @@ export default function AdminApp() {
                         onChange={(url) => updateTour({ img: url })}
                       />
                       <div className="a-field a-full">
-                        <label>WhatsApp Mesajı</label>
+                        <label>WhatsApp Mesajı ({editLang.toUpperCase()})</label>
                         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                           <input
                             style={{ flex: 1, minWidth: 220 }}
-                            value={tour.wa}
-                            onChange={(e) => updateTour({ wa: e.target.value })}
+                            value={tourText.wa}
+                            onChange={(e) => updateTourText({ wa: e.target.value })}
                             placeholder="Hello, I would like to get information about..."
                           />
                           <button type="button" className="a-btn a-sm" onClick={genWa}><Wand2 size={13} /> Otomatik yaz</button>
@@ -511,17 +577,17 @@ export default function AdminApp() {
                       <div className="a-g"></div>
                       {tour.badge ? <span className="a-b">{tour.badge}</span> : null}
                       <div className="a-n">
-                        <b dangerouslySetInnerHTML={{ __html: (tour.name || "—").replace(/^Cappadocia /, "CAPPADOCIA<br>") }} />
+                        <b>{tourText.name || "—"}</b>
                         <span>{[tour.time, tour.price].filter(Boolean).join("  ·  ")}</span>
                       </div>
                     </div>
                     <div className="a-prev-back">
-                      <span className="a-c">{CAT_LABEL_EN[tour.cat] || ""}</span>
-                      <h4>{tour.name || "—"}</h4>
-                      <p>{tour.desc || "—"}</p>
+                      <span className="a-c">{CAT_LABEL_I18N[editLang]?.[tour.cat] || ""}</span>
+                      <h4>{tourText.name || "—"}</h4>
+                      <p>{tourText.desc || "—"}</p>
                       <a
                         className="a-wa"
-                        href={`https://wa.me/${num}?text=${encodeURIComponent(tour.wa || "")}`}
+                        href={`https://wa.me/${num}?text=${encodeURIComponent(tourText.wa || "")}`}
                         target="_blank"
                         rel="noopener noreferrer"
                       >
@@ -543,37 +609,41 @@ export default function AdminApp() {
                 <p>Ana sayfada büyük fotoğraflarla gösterilen 4 deneyim.</p>
               </div>
             </div>
+            <LangTabs lang={editLang} setLang={setEditLang} />
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(330px,1fr))", gap: 16 }}>
-              {data.featured.map((f, i) => (
-                <div className="a-card" key={i}>
-                  <div style={{ height: 130, borderRadius: 11, overflow: "hidden", background: "#241206", marginBottom: 14 }}>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={f.img || ""} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} onError={(e) => (e.currentTarget.style.opacity = 0)} />
+              {data.featured.map((f, i) => {
+                const ft = f.i18n[editLang] || f.i18n[DEFAULT_LANG];
+                return (
+                  <div className="a-card" key={i}>
+                    <div style={{ height: 130, borderRadius: 11, overflow: "hidden", background: "#241206", marginBottom: 14 }}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={f.img || ""} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} onError={(e) => (e.currentTarget.style.opacity = 0)} />
+                    </div>
+                    <div className="a-grid-form" style={{ gridTemplateColumns: "1fr" }}>
+                      <div className="a-field">
+                        <label>Başlık ({editLang.toUpperCase()})</label>
+                        <input value={ft.title} onChange={(e) => updateFeaturedText(i, { title: e.target.value })} />
+                      </div>
+                      <div className="a-field">
+                        <label>Alt yazı ({editLang.toUpperCase()})</label>
+                        <input value={ft.sub} onChange={(e) => updateFeaturedText(i, { sub: e.target.value })} />
+                      </div>
+                      <div className="a-field">
+                        <label>Fotoğraf</label>
+                        <input value={f.img} onChange={(e) => updateFeatured(i, { img: e.target.value })} />
+                      </div>
+                      <div className="a-field">
+                        <label>Bağlı olduğu tur (WhatsApp mesajı için)</label>
+                        <select value={f.tourId || ""} onChange={(e) => updateFeatured(i, { tourId: e.target.value })}>
+                          {data.tours.map((t) => (
+                            <option key={t.id} value={t.id}>{(t.i18n[editLang] || t.i18n[DEFAULT_LANG]).name}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
                   </div>
-                  <div className="a-grid-form" style={{ gridTemplateColumns: "1fr" }}>
-                    <div className="a-field">
-                      <label>Başlık</label>
-                      <input value={f.title} onChange={(e) => updateFeatured(i, { title: e.target.value })} />
-                    </div>
-                    <div className="a-field">
-                      <label>Alt yazı</label>
-                      <input value={f.sub} onChange={(e) => updateFeatured(i, { sub: e.target.value })} />
-                    </div>
-                    <div className="a-field">
-                      <label>Fotoğraf</label>
-                      <input value={f.img} onChange={(e) => updateFeatured(i, { img: e.target.value })} />
-                    </div>
-                    <div className="a-field">
-                      <label>Bağlı olduğu tur (WhatsApp mesajı için)</label>
-                      <select value={f.name} onChange={(e) => updateFeatured(i, { name: e.target.value })}>
-                        {data.tours.map((t) => (
-                          <option key={t.name} value={t.name}>{t.name}</option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </section>
         )}
@@ -596,18 +666,6 @@ export default function AdminApp() {
                   <label>E-posta</label>
                   <input value={data.settings.email} onChange={(e) => updateSettings({ email: e.target.value })} placeholder="info@capguidetravel.com" />
                 </div>
-                <div className="a-field">
-                  <label>Ana Başlık — 1. satır</label>
-                  <input value={data.settings.heroTitleTop} onChange={(e) => updateSettings({ heroTitleTop: e.target.value })} />
-                </div>
-                <div className="a-field">
-                  <label>Ana Başlık — 2. satır (turuncu)</label>
-                  <input value={data.settings.heroTitleBottom} onChange={(e) => updateSettings({ heroTitleBottom: e.target.value })} />
-                </div>
-                <div className="a-field a-full">
-                  <label>Başlık altı yazı</label>
-                  <input value={data.settings.heroSub} onChange={(e) => updateSettings({ heroSub: e.target.value })} />
-                </div>
                 <ImageUploadField
                   label="Ana (hero) fotoğrafı"
                   value={data.settings.heroImg}
@@ -618,10 +676,6 @@ export default function AdminApp() {
                   value={data.settings.aboutImg}
                   onChange={(url) => updateSettings({ aboutImg: url })}
                 />
-                <div className="a-field a-full">
-                  <label>Genel WhatsApp mesajı (butonlar için)</label>
-                  <input value={data.settings.defaultMsg} onChange={(e) => updateSettings({ defaultMsg: e.target.value })} />
-                </div>
                 <ImageUploadField
                   label="Logo"
                   value={data.settings.logoImg}
@@ -637,8 +691,35 @@ export default function AdminApp() {
               </div>
             </div>
 
+            <h3 style={{ marginTop: 28, marginBottom: 4 }}>Çok Dilli İçerik</h3>
+            <p className="a-hint" style={{ marginBottom: 12 }}>
+              Ana sayfa başlıkları ve SEO metinleri — her dil için ayrı ayrı doldurulur.
+            </p>
+            <LangTabs lang={editLang} setLang={setEditLang} />
+
+            <div className="a-card" style={{ maxWidth: 820, marginTop: 14 }}>
+              <div className="a-grid-form">
+                <div className="a-field">
+                  <label>Ana Başlık — 1. satır ({editLang.toUpperCase()})</label>
+                  <input value={settingsText.heroTitleTop} onChange={(e) => updateSettingsText({ heroTitleTop: e.target.value })} />
+                </div>
+                <div className="a-field">
+                  <label>Ana Başlık — 2. satır ({editLang.toUpperCase()}, turuncu)</label>
+                  <input value={settingsText.heroTitleBottom} onChange={(e) => updateSettingsText({ heroTitleBottom: e.target.value })} />
+                </div>
+                <div className="a-field a-full">
+                  <label>Başlık altı yazı ({editLang.toUpperCase()})</label>
+                  <input value={settingsText.heroSub} onChange={(e) => updateSettingsText({ heroSub: e.target.value })} />
+                </div>
+                <div className="a-field a-full">
+                  <label>Genel WhatsApp mesajı ({editLang.toUpperCase()}, butonlar için)</label>
+                  <input value={settingsText.defaultMsg} onChange={(e) => updateSettingsText({ defaultMsg: e.target.value })} />
+                </div>
+              </div>
+            </div>
+
             <div className="a-card" style={{ maxWidth: 820, marginTop: 20 }}>
-              <h3 style={{ marginTop: 0 }}>SEO (Arama Motoru Ayarları)</h3>
+              <h3 style={{ marginTop: 0 }}>SEO ({editLang.toUpperCase()})</h3>
               <p className="a-hint" style={{ marginTop: -6, marginBottom: 16 }}>
                 Google gibi arama motorlarında ve sosyal medyada paylaşıldığında görünen başlık ve açıklama.
               </p>
@@ -646,16 +727,16 @@ export default function AdminApp() {
                 <div className="a-field a-full">
                   <label>Sayfa Başlığı (SEO Title)</label>
                   <input
-                    value={data.settings.seoTitle}
-                    onChange={(e) => updateSettings({ seoTitle: e.target.value })}
+                    value={settingsText.seoTitle}
+                    onChange={(e) => updateSettingsText({ seoTitle: e.target.value })}
                     placeholder="Capguide Travel — Discover Cappadocia"
                   />
                 </div>
                 <div className="a-field a-full">
                   <label>Meta Açıklama (SEO Description)</label>
                   <textarea
-                    value={data.settings.seoDescription}
-                    onChange={(e) => updateSettings({ seoDescription: e.target.value })}
+                    value={settingsText.seoDescription}
+                    onChange={(e) => updateSettingsText({ seoDescription: e.target.value })}
                     placeholder="Capguide Travel — Tours, adventures, experiences and workshops in Cappadocia."
                   />
                 </div>
